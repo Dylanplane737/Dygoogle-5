@@ -1,14 +1,14 @@
-# Dygoogle – Smart Web Launcher 🚀  
+# Dygoogle 5 – Smart Web Launcher  
 
 A fun little web app powered by DylanAI.  
 Search websites, get instant Wikipedia summaries, related images & videos, dictionary definitions…  
-and maybe even get rickrolled. 😉  
+who knows you may even get rickrolled. 
 
 ---
 
 ## 🎮 Play Now  
 
-👉 [**Click here to play Dygoogle in your browser**](https://your-username.github.io/your-repo-name/)  
+👉 [**Click here to play Dygoogle in your browser**](https://dylanplane737.github.io/Dygoogle-5/)  
 
 _No downloads needed — works directly online with GitHub Pages._  
 
@@ -22,13 +22,6 @@ If you’d rather download it:
 3. Unzip, then open `index.html` in your browser.  
 
 ---
-
-## 📸 Screenshots  
-
-*(Add screenshots or a GIF demo here to show what it looks like!)*  
-
----
-
 ## 📜 License  
 
 No license (all rights reserved) — feel free to play, but please don’t redistribute without permission.  
