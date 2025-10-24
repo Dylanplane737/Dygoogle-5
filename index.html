@@ -19,12 +19,13 @@
   input#urlInput {
     width: 100%; padding: 12px 16px; font-size: 16px; border-radius: 999px; border: 1px solid rgba(0,0,0,0.1);
     box-sizing: border-box;
+    transition: box-shadow 150ms ease, transform 120ms ease, border-color 150ms ease;
   }
   button { margin-top: 12px; padding: 12px 26px; border-radius: 28px; border: none; cursor: pointer; background:#0f75a8; color:white; box-shadow: 0 6px 12px rgba(0,0,0,0.12); }
   button:hover { transform: translateY(-2px); }
 
   /* Suggestions */
-  .suggestions { position: absolute; left: 0; right: 0; top: 52px; background: white; color: #222; border-radius: 10px; box-shadow: 0 6px 18px rgba(0,0,0,0.12); z-index: 30; max-height: 240px; overflow:auto; display:none; }
+  .suggestions { position: absolute; left: 0; right: 0; top: 52px; background: white; color: #222; border-radius: 10px; box-shadow: 0 6px 18px rgba(0,0,0,0.12); z-index: 30; max-height: 240px; overflow:auto; }
   .suggestions.show { display:block; }
   .suggestions div { padding: 8px 12px; cursor:pointer; }
   .suggestions div:hover, .suggestions .highlighted { background:#0f75a8; color:white; }
@@ -72,6 +73,23 @@
 
   /* Matrix canvas (overlay) */
   canvas#matrixCanvas { position:fixed; inset:0; z-index:1200; pointer-events:none; display:none; }
+
+  /* Typing glow (Option B) */
+  input#urlInput.typing {
+    animation: neonPulse 1s ease-in-out infinite alternate;
+    box-shadow: 0 0 30px rgba(0,160,255,0.35), 0 0 60px rgba(0,200,255,0.20);
+    border-color: rgba(0,200,255,0.6);
+    transform: translateY(-1px);
+  }
+
+  @keyframes neonPulse {
+    from {
+      box-shadow: 0 0 20px rgba(0,140,255,0.5), 0 0 40px rgba(0,180,255,0.25);
+    }
+    to {
+      box-shadow: 0 0 60px rgba(0,200,255,0.9), 0 0 100px rgba(0,220,255,0.35);
+    }
+  }
 
   /* Responsive */
   @media (max-width:900px) {
@@ -138,6 +156,7 @@ const NEWS_API_KEY = "e6af6cc935544b4f8b8833922035df15"; // your provided key
 // State
 let highlightedIndex = -1;
 let debounceTimer;
+let typingTimer;
 let commonsOffset = 0;
 let currentQuery = "";
 let imagesList = []; // track full-size image URLs for lightbox
@@ -215,7 +234,7 @@ urlInput.addEventListener("keydown", (e)=>{
   if (!items.length) return;
   if (e.key === "ArrowDown"){ e.preventDefault(); highlightedIndex = (highlightedIndex+1)%items.length; updateHighlight(items); }
   else if (e.key === "ArrowUp"){ e.preventDefault(); highlightedIndex = (highlightedIndex-1+items.length)%items.length; updateHighlight(items); }
-  else if (e.key === "Enter"){ if (highlightedIndex>=0){ e.preventDefault(); urlInput.value = items[highlightedIndex].textContent; suggestionBox.innerHTML=""; suggestionBox.classList.remove("show"); } else { openWebsite(); } }
+  else if (e.key === "Enter"){ if (highlightedIndex>=0){ e.preventDefault(); urlInput.value = items[highlightedIndex].textContent; suggestionBox.innerHTML=""; suggestionBox.classList.remove("show"); } }
   else if (e.key === "Escape"){ suggestionBox.innerHTML=""; suggestionBox.classList.remove("show"); highlightedIndex=-1; }
 });
 function updateHighlight(items){ items.forEach((it,i)=> it.classList.toggle("highlighted", i===highlightedIndex)); }
@@ -242,7 +261,7 @@ async function getWikiSummary(query){
 // --- Wikimedia Commons media ---
 async function getCommonsMedia(query, offset=0){
   try {
-    const endpoint = `https://commons.wikimedia.org/w/api.php?action=query&origin=*&format=json&generator=search&gsrsearch=${encodeURIComponent(query)}&gsrlimit=20&gsroffset=${offset}&gsrnamespace=6&prop=imageinfo&iiprop=url|mime|thumbmime&iiurlwidth=400`;
+    const endpoint = `https://commons.wikimedia.org/w/api.php?action=query&origin=*&format=json&generator=search&gsrsearch=${encodeURIComponent(query)}&gsrlimit=20&gsroffset=${offset}&gsrnamespace=6&prop=imageinfo&iiprop=url|mime|extmetadata|thumbmime&iithumbwidth=300`;
     const res = await fetch(endpoint);
     if (!res.ok) return { images:[], videos:[] };
     const data = await res.json();
@@ -335,7 +354,7 @@ function renderTimeline(events){
 // --- Escape helper for safe insertion (small) ---
 function escapeHtml(text){
   if (!text) return "";
-  return text.replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'})[c]);
+  return text.replace(/[&<>\'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;', '"':'&quot;'})[c]);
 }
 
 // --- Lightbox gallery ---
@@ -458,10 +477,10 @@ async function openWebsite(){
     // 1) Wiki summary
     const summary = await getWikiSummary(input);
     if (!summary) { alert("No Wikipedia article found for your query."); return; }
-    wikiSummaryEl.innerHTML = `<h2 style="margin-top:0">${escapeHtml(summary.title)}</h2>
-      ${summary.thumbnail ? `<img src="${summary.thumbnail}" alt="${escapeHtml(summary.title)}">` : ""}
-      <p>${escapeHtml(summary.extract)}</p>
-      <p><a href="${summary.fullurl}" target="_blank" rel="noopener" style="color:#a8d0e6">Read more on Wikipedia</a></p>`;
+    wikiSummaryEl.innerHTML = `<h2 style="margin-top:0">${escapeHtml(summary.title)}</h2>` +
+      `${summary.thumbnail ? `<img src="${summary.thumbnail}" alt="${escapeHtml(summary.title)}">` : ""}` +
+      `<p>${escapeHtml(summary.extract)}</p>` +
+      `<p><a href="${summary.fullurl}" target="_blank" rel="noopener" style="color:#a8d0e6">Read more on Wikipedia</a></p>`;
 
     // 2) Wikimedia images (first batch)
     try {
@@ -548,6 +567,19 @@ urlInput.addEventListener("input", ()=> {
   // stop matrix and transform when user edits
   stopMatrix();
   document.body.style.transform = "";
+});
+
+// Typing glow: add/remove class while user is actively typing
+urlInput.addEventListener('input', () => {
+  urlInput.classList.add('typing');
+  clearTimeout(typingTimer);
+  // remove typing class 700ms after last keystroke
+  typingTimer = setTimeout(() => urlInput.classList.remove('typing'), 700);
+});
+// remove immediately on blur
+urlInput.addEventListener('blur', () => {
+  clearTimeout(typingTimer);
+  urlInput.classList.remove('typing');
 });
 
 // Make input clickable suggestions disappear on outside click
