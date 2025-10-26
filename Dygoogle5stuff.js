@@ -33,7 +33,7 @@ function enablePerformanceMode() {
   if (window.stopSeasonalBackground) stopSeasonalBackground();
 
   // Hide heavy UI sections temporarily
-  [window.imagesSection, window.videosSection, window.timelineContainer, window.dictionaryContainer].forEach(c => c && (c.style.display = "none"));
+  [window.imagesSection, window.videosSection, window.].forEach(c => c && (c.style.display = "none"));
 
   // Stop pulsing gear animation
   if (window.performanceModeInterval) {
