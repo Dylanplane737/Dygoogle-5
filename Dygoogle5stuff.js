@@ -50,7 +50,7 @@ function disablePerformanceMode() {
   performanceModeActive = false;
 
   // Restore UI sections
-  [window.imagesSection, window.videosSection, window.timelineContainer, window.dictionaryContainer].forEach(c => c && (c.style.display = ""));
+  [window.imagesSection, window.videosSection,].forEach(c => c && (c.style.display = ""));
 
   // Restart seasonal effects
   const season = localStorage.getItem("dygoogleSeason") || "none";
