@@ -17,7 +17,7 @@ function createSettingsMenu() {
   menu.style.fontFamily = "sans-serif";
   menu.style.width = "220px";
   menu.style.boxShadow = "0 6px 18px rgba(0,0,0,0.25)";
-
+  
   // Title
   const title = document.createElement("h4");
   title.textContent = "Settings";
@@ -29,14 +29,9 @@ function createSettingsMenu() {
   bgLabel.textContent = "Background color: ";
   const bgInput = document.createElement("input");
   bgInput.type = "color";
-
-  // Load saved color
-  bgInput.value = localStorage.getItem("dygoogleBGColor") || "#2596be";
-  document.body.style.backgroundColor = bgInput.value;
-
+  bgInput.value = "#2596be";
   bgInput.oninput = () => {
     document.body.style.backgroundColor = bgInput.value;
-    localStorage.setItem("dygoogleBGColor", bgInput.value);
   };
   bgLabel.appendChild(bgInput);
   menu.appendChild(bgLabel);
@@ -49,12 +44,7 @@ function createSettingsMenu() {
   animLabel.style.marginTop = "8px";
   const animInput = document.createElement("input");
   animInput.type = "checkbox";
-
-  // Load saved state
-  animInput.checked = localStorage.getItem("dygoogleSeasonalBG") === "true";
-
   animInput.onchange = () => {
-    localStorage.setItem("dygoogleSeasonalBG", animInput.checked);
     if (animInput.checked) startSeasonalBackground();
     else stopSeasonalBackground();
   };
@@ -71,9 +61,6 @@ function createSettingsMenu() {
   menu.appendChild(footer);
 
   document.body.appendChild(menu);
-
-  // Apply saved animation state on load
-  if (animInput.checked) startSeasonalBackground();
 }
 
 // --- Example seasonal background ---
@@ -89,8 +76,6 @@ function startSeasonalBackground() {
 function stopSeasonalBackground() {
   if (seasonalInterval) clearInterval(seasonalInterval);
   seasonalInterval = null;
-  // Restore background color from storage
-  document.body.style.backgroundColor = localStorage.getItem("dygoogleBGColor") || "#2596be";
 }
 
 // Initialize settings menu after DOM loads
