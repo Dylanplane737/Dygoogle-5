@@ -8,7 +8,7 @@ who knows you may even get rickrolled.
 
 ## 🎮 Search Now  
 
-👉 [**Click here to use Nova in your browser**](https://dylanplane737.github.io/Dygoogle-5/)  
+👉 [**Click here to use Nova in your browser**](https://dylanplane737.github.io/Nova-5/)  
 
 _No downloads needed — works directly online with GitHub Pages._  
 
