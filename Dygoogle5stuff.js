@@ -1,5 +1,19 @@
-// Dygoogle5stuff.js - Updated UI & Features
+// Dygoogle5stuff.js
 console.log("Dygoogle5stuff.js loaded!");
+
+// --- Apply user's saved background ---
+function applyUserBackground() {
+  const customBG = localStorage.getItem("dygoogleCustomBG");
+  const bgColor = localStorage.getItem("dygoogleBGColor") || "#2596be"; // fallback to Classic
+
+  if (customBG) {
+    document.body.style.backgroundImage = `url('${customBG}')`;
+    document.body.style.backgroundColor = bgColor;
+  } else {
+    document.body.style.backgroundImage = "";
+    document.body.style.backgroundColor = bgColor;
+  }
+}
 
 // --- Settings menu with animated gear icon ---
 function createSettingsMenu() {
@@ -33,14 +47,15 @@ function createSettingsMenu() {
     position: "fixed",
     bottom: "72px",
     right: "16px",
-    background: "rgba(0,0,0,0.85)",
+    background: "rgba(0,0,0,0.7)",
+    backdropFilter: "blur(8px)",
     color: "white",
-    padding: "16px",
+    padding: "20px",
     borderRadius: "16px",
     zIndex: "1500",
-    fontFamily: "sans-serif",
-    width: "260px",
-    boxShadow: "0 8px 22px rgba(0,0,0,0.35)",
+    fontFamily: "Arial, sans-serif",
+    width: "280px",
+    boxShadow: "0 8px 28px rgba(0,0,0,0.4)",
     display: "none",
     transform: "scale(0)",
     transformOrigin: "bottom right",
@@ -65,7 +80,6 @@ function createSettingsMenu() {
     presetSelect.appendChild(option);
   }
   presetSelect.value = localStorage.getItem("dygoogleBGColor") || "#2596be";
-  document.body.style.backgroundColor = presetSelect.value;
   presetSelect.onchange = () => {
     document.body.style.backgroundColor = presetSelect.value;
     document.body.style.backgroundImage = ""; // remove any previous image
@@ -117,6 +131,7 @@ function createSettingsMenu() {
   removeBtn.textContent = "Remove BG Image";
   removeBtn.style.marginTop = "6px";
   removeBtn.style.width = "100%";
+  removeBtn.style.cursor = "pointer";
   removeBtn.onclick = () => {
     document.body.style.backgroundImage = "";
     localStorage.removeItem("dygoogleCustomBG");
@@ -185,9 +200,8 @@ function createSettingsMenu() {
     }
   });
 
-  // Load saved custom background
-  const savedBG = localStorage.getItem("dygoogleCustomBG");
-  if (savedBG) document.body.style.backgroundImage = `url('${savedBG}')`;
+  // Load saved user background
+  applyUserBackground();
 
   // Load saved season
   if (seasonSelect.value !== "none") startSeasonalBackground(seasonSelect.value);
