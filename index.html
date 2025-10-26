@@ -692,5 +692,68 @@ window.addEventListener("load", () => {
   });
 });
 </script>
+  <!-- Dylatosh Wikidata Search -->
+<div id="dylSearch" style="max-width:800px;margin:20px auto;text-align:center;">
+  <input id="dylQuery" placeholder="Search with Wikidata (try: YouTube, NASA, Minecraft)..."
+         style="width:100%;padding:10px;font-size:16px;border-radius:8px;border:1px solid #ccc"/>
+  <div id="dylResults" style="margin-top:12px;text-align:left;"></div>
+
+  <div style="margin-top:10px;font-size:12px;color:#666;">
+    Data from <a href="https://www.wikidata.org" target="_blank" rel="noopener">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/6/66/Wikidata-logo-en.svg" 
+           alt="Wikidata" style="height:16px;vertical-align:middle;">
+    </a>
+  </div>
+</div>
+
+<script>
+(async function() {
+  const input = document.getElementById('dylQuery');
+  const resultsDiv = document.getElementById('dylResults');
+
+  // --- helper ---
+  function escapeHtml(s) { return s.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+  async function searchWikidata(query) {
+    const endpoint = "https://www.wikidata.org/w/api.php?action=wbsearchentities&language=en&uselang=en&format=json&origin=*&search=" + encodeURIComponent(query);
+    const res = await fetch(endpoint);
+    const data = await res.json();
+    return data.search || [];
+  }
+
+  async function render(query) {
+    resultsDiv.innerHTML = '<div style="color:#666;">Searching...</div>';
+    const results = await searchWikidata(query);
+    if (results.length === 0) {
+      resultsDiv.innerHTML = '<div style="color:#666;">No results found.</div>';
+      return;
+    }
+
+    const html = results.map(r => {
+      const label = escapeHtml(r.label || "Unnamed");
+      const desc = escapeHtml(r.description || "");
+      const link = r.concepturi || `https://www.wikidata.org/wiki/${r.id}`;
+      return `
+        <a href="${link}" target="_blank" rel="noopener" 
+           style="display:block;padding:10px;border:1px solid #eee;border-radius:8px;
+                  margin-bottom:8px;text-decoration:none;">
+          <div style="font-weight:600;">${label}</div>
+          <div style="font-size:13px;color:#555;margin-top:4px;">${desc}</div>
+          <div style="font-size:12px;color:#0b69ff;margin-top:6px;">${link}</div>
+        </a>
+      `;
+    }).join("");
+
+    resultsDiv.innerHTML = html;
+  }
+
+  input.addEventListener('input', (e) => {
+    const q = e.target.value.trim();
+    if (q.length < 2) { resultsDiv.innerHTML = ""; return; }
+    clearTimeout(window._dylTimeout);
+    window._dylTimeout = setTimeout(() => render(q), 300);
+  });
+})();
+</script>
 </body>
 </html>
