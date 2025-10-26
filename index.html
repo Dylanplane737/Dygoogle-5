@@ -4,12 +4,16 @@
   <meta charset="utf-8" />
   <title>Nova 5</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
+  
+  <!-- Favicon -->
   <link rel="icon" type="image/png" href="falcon.png">
+
+  <!-- CSS -->
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <header>
-    <div class="logo"></div> <!-- Logo inserted by logo.js -->
+    <div class="logo"></div> <!-- Logo will be set by logo.js -->
   </header>
 
   <main>
@@ -19,7 +23,7 @@
     </section>
 
     <div style="text-align:center;">
-      <button id="openBtn" onclick="openWebsite()">Open</button>
+      <button id="openBtn">Open</button>
     </div>
 
     <div id="loadingSpinner" class="spinner" aria-hidden="true"></div>
@@ -62,8 +66,9 @@
     <canvas id="matrixCanvas"></canvas>
   </main>
 
+  <!-- JS -->
+  <script src="Dygoogle5stuff.js"></script>
+  <script src="main.js"></script>
   <script src="logo.js"></script>
-  <script src="Main.js"></script>
 </body>
 </html>
-
