@@ -226,3 +226,59 @@ function stopSeasonalBackground() { /* ... your code ... */ }
 
 // Initialize after DOM is ready
 window.addEventListener("DOMContentLoaded", createSettingsMenu);
+// ======= Performance Mode (Reduced Lag) =======
+function enablePerformanceMode() {
+  console.log("Performance Mode enabled: heavy effects paused.");
+
+  // Stop Matrix animation
+  if (window.stopMatrix) stopMatrix();
+
+  // Stop seasonal effects
+  if (window.stopSeasonalBackground) stopSeasonalBackground();
+
+  // Remove typing glow
+  if (window.urlInput) urlInput.classList.remove('typing');
+
+  // Hide heavy UI sections temporarily
+  const containers = [imagesSection, videosSection, timelineContainer, dictionaryContainer];
+  containers.forEach(c => c.style.display = "none");
+
+  // Prevent infinite scroll from firing
+  if (window.imagesSection) {
+    imagesSection.removeEventListener('scroll', imagesSection._infiniteScrollHandler);
+  }
+
+  // Optional: cancel any running intervals (like pulsing gear)
+  if (window.performanceModeInterval) {
+    clearInterval(window.performanceModeInterval);
+    window.performanceModeInterval = null;
+  }
+}
+
+// Optional: store a reference to the original scroll handler
+if (imagesSection && !imagesSection._infiniteScrollHandler) {
+  imagesSection._infiniteScrollHandler = imagesSection._listeners?.scroll?.[0] || null;
+}
+
+// Add a toggle button to UI (optional)
+function createPerformanceToggle() {
+  const btn = document.createElement("button");
+  btn.textContent = "⚡ Performance Mode";
+  Object.assign(btn.style, {
+    position: "fixed",
+    bottom: "16px",
+    left: "16px",
+    zIndex: "1500",
+    padding: "8px 12px",
+    borderRadius: "12px",
+    border: "none",
+    cursor: "pointer",
+    background: "#ff4d4d",
+    color: "white",
+    fontWeight: "bold",
+  });
+  btn.onclick = enablePerformanceMode;
+  document.body.appendChild(btn);
+}
+
+window.addEventListener("DOMContentLoaded", createPerformanceToggle);
