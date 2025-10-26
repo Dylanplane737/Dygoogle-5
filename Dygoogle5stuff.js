@@ -1,7 +1,12 @@
 // Dygoogle5stuff.js
 console.log("Dygoogle5stuff.js loaded!");
 
-// --- Apply user's saved background ---
+// ====== GLOBAL STATE ======
+let performanceModeActive = false;
+
+// ====== HELPER FUNCTIONS ======
+
+// Apply user's saved background
 function applyUserBackground() {
   const customBG = localStorage.getItem("dygoogleCustomBG");
   const bgColor = localStorage.getItem("dygoogleBGColor");
@@ -13,74 +18,136 @@ function applyUserBackground() {
   } else {
     document.body.style.backgroundImage = "";
   }
-
-  document.body.style.backgroundColor = bgColor || ""; // fallback to default if none
+  document.body.style.backgroundColor = bgColor || "#2596be";
 }
 
-// --- Settings menu with animated gear icon ---
+// Enable Performance Mode (Reduced Lag)
+function enablePerformanceMode() {
+  console.log("Performance Mode enabled: heavy effects paused.");
+  performanceModeActive = true;
+
+  // Stop Matrix animation
+  if (window.stopMatrix) stopMatrix();
+
+  // Stop seasonal effects
+  if (window.stopSeasonalBackground) stopSeasonalBackground();
+
+  // Hide heavy UI sections temporarily
+  [window.imagesSection, window.videosSection, window.timelineContainer, window.dictionaryContainer].forEach(c => c && (c.style.display = "none"));
+
+  // Stop pulsing gear animation
+  if (window.performanceModeInterval) {
+    clearInterval(window.performanceModeInterval);
+    window.performanceModeInterval = null;
+  }
+
+  updatePerformanceStatusUI();
+}
+
+// Disable Performance Mode
+function disablePerformanceMode() {
+  console.log("Performance Mode disabled: heavy effects restored.");
+  performanceModeActive = false;
+
+  // Restore UI sections
+  [window.imagesSection, window.videosSection, window.timelineContainer, window.dictionaryContainer].forEach(c => c && (c.style.display = ""));
+
+  // Restart seasonal effects
+  const season = localStorage.getItem("dygoogleSeason") || "none";
+  if (season !== "none") startSeasonalBackground(season);
+
+  updatePerformanceStatusUI();
+}
+
+// Update Performance Mode status display in menu
+function updatePerformanceStatusUI() {
+  const label = document.getElementById("performanceStatus");
+  if (label) {
+    label.textContent = "Performance Mode: " + (performanceModeActive ? "ON ⚡" : "OFF ❌");
+    label.style.color = performanceModeActive ? "#ff4d4d" : "#aaa";
+  }
+}
+
+// Monitor for lag automatically
+function monitorPerformance() {
+  let lastTime = performance.now();
+  const threshold = 50;
+
+  function check() {
+    const now = performance.now();
+    const delta = now - lastTime;
+    lastTime = now;
+    if (delta > threshold && !performanceModeActive) {
+      console.warn("High frame time detected:", delta.toFixed(1), "ms — enabling Performance Mode.");
+      enablePerformanceMode();
+      return;
+    }
+    requestAnimationFrame(check);
+  }
+  requestAnimationFrame(check);
+}
+
+// ====== SETTINGS MENU ======
 function createSettingsMenu() {
-  if (document.getElementById("settingsIcon")) return; // prevent duplicate menus
+  if (document.getElementById("settingsIcon")) return;
 
- // Gear icon
-const menuIcon = document.createElement("div");
-menuIcon.id = "settingsIcon";
-menuIcon.textContent = "⚙";
-Object.assign(menuIcon.style, {
-  position: "fixed",
-  bottom: "16px",
-  right: "16px",
-  fontSize: "28px",
-  cursor: "pointer",
-  zIndex: "1500",
-  color: "white",
-  background: "rgba(0,0,0,0.6)",
-  borderRadius: "50%",
-  width: "48px",
-  height: "48px",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  boxShadow: "0 6px 18px rgba(0,0,0,0.25)",
-  transition: "transform 0.3s ease, box-shadow 0.3s ease"
-});
-
-// --- Pulsing Animation ---
-let pulseDirection = 1;
-setInterval(() => {
-  const scale = 1 + 0.05 * pulseDirection; // scale between 1.00 and 1.05
-  menuIcon.style.transform = `scale(${scale})`;
-  pulseDirection *= -1;
-}, 600);
-
-  // Menu container
+  // --- Menu Container ---
   const menu = document.createElement("div");
   menu.id = "settingsMenu";
   Object.assign(menu.style, {
     position: "fixed",
     bottom: "72px",
     right: "16px",
-    background: "rgba(0,0,0,0.7)",
-    backdropFilter: "blur(8px)",
-    color: "white",
+    width: "300px",
+    background: "rgba(0,0,0,0.75)",
+    color: "#fff",
     padding: "20px",
     borderRadius: "16px",
-    zIndex: "1500",
+    boxShadow: "0 10px 30px rgba(0,0,0,0.4)",
+    backdropFilter: "blur(8px)",
     fontFamily: "Arial, sans-serif",
-    width: "280px",
-    boxShadow: "0 8px 28px rgba(0,0,0,0.4)",
-    display: "none",
     transform: "scale(0)",
     transformOrigin: "bottom right",
-    transition: "transform 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55)"
+    transition: "transform 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55)",
+    zIndex: 1500
   });
 
-  const title = document.createElement("h4");
+  // --- Menu Title ---
+  const title = document.createElement("h3");
   title.textContent = "Settings";
-  title.style.margin = "0 0 12px 0";
-  title.style.textAlign = "center";
+  Object.assign(title.style, { textAlign: "center", margin: "0 0 15px 0", fontWeight: "bold" });
   menu.appendChild(title);
 
+  // --- Performance Mode Status ---
+  const perfStatusLabel = document.createElement("div");
+  perfStatusLabel.id = "performanceStatus";
+  perfStatusLabel.style.marginBottom = "10px";
+  menu.appendChild(perfStatusLabel);
+  updatePerformanceStatusUI();
+
+  // Toggle button
+  const togglePerfBtn = document.createElement("button");
+  togglePerfBtn.textContent = "Toggle Performance Mode";
+  Object.assign(togglePerfBtn.style, {
+    width: "100%",
+    padding: "8px",
+    marginBottom: "12px",
+    borderRadius: "12px",
+    border: "none",
+    cursor: "pointer",
+    background: "#ff4d4d",
+    color: "#fff",
+    fontWeight: "bold"
+  });
+  togglePerfBtn.onclick = () => {
+    if (performanceModeActive) disablePerformanceMode();
+    else enablePerformanceMode();
+  };
+  menu.appendChild(togglePerfBtn);
+
   // --- Theme Presets ---
+  const themeContainer = document.createElement("div");
+  themeContainer.style.marginBottom = "12px";
   const presetLabel = document.createElement("label");
   presetLabel.textContent = "Theme Presets: ";
   const presetSelect = document.createElement("select");
@@ -94,15 +161,15 @@ setInterval(() => {
   presetSelect.value = localStorage.getItem("dygoogleBGColor") || "#2596be";
   presetSelect.onchange = () => {
     document.body.style.backgroundColor = presetSelect.value;
-    document.body.style.backgroundImage = ""; // remove any previous image
+    document.body.style.backgroundImage = "";
     localStorage.setItem("dygoogleBGColor", presetSelect.value);
     localStorage.removeItem("dygoogleCustomBG");
   };
   presetLabel.appendChild(presetSelect);
-  menu.appendChild(presetLabel);
-  menu.appendChild(document.createElement("br"));
+  themeContainer.appendChild(presetLabel);
+  menu.appendChild(themeContainer);
 
-  // --- Background color picker ---
+  // --- Custom Background Color ---
   const bgLabel = document.createElement("label");
   bgLabel.textContent = "Custom BG Color: ";
   const bgInput = document.createElement("input");
@@ -116,15 +183,14 @@ setInterval(() => {
   };
   bgLabel.appendChild(bgInput);
   menu.appendChild(bgLabel);
-  menu.appendChild(document.createElement("br"));
 
-  // --- Upload custom background ---
+  // --- Upload Custom Background ---
   const uploadLabel = document.createElement("label");
   uploadLabel.textContent = "Upload BG: ";
   const uploadInput = document.createElement("input");
   uploadInput.type = "file";
   uploadInput.accept = "image/*";
-  uploadInput.onchange = (e) => {
+  uploadInput.onchange = e => {
     const file = e.target.files[0];
     if (!file) return;
     const reader = new FileReader();
@@ -137,22 +203,35 @@ setInterval(() => {
     reader.readAsDataURL(file);
   };
   uploadLabel.appendChild(uploadInput);
+  menu.appendChild(uploadLabel);
 
-  // Remove background button
   const removeBtn = document.createElement("button");
   removeBtn.textContent = "Remove BG Image";
-  removeBtn.style.marginTop = "6px";
-  removeBtn.style.width = "100%";
-  removeBtn.style.cursor = "pointer";
+  Object.assign(removeBtn.style, { marginTop: "6px", width: "100%", cursor: "pointer" });
   removeBtn.onclick = () => {
     document.body.style.backgroundImage = "";
     localStorage.removeItem("dygoogleCustomBG");
   };
-
-  menu.appendChild(uploadLabel);
-  menu.appendChild(document.createElement("br"));
   menu.appendChild(removeBtn);
-  menu.appendChild(document.createElement("br"));
+
+  // --- Custom Cursor ---
+  const cursorLabel = document.createElement("label");
+  cursorLabel.textContent = "Custom Cursor Emoji: ";
+  cursorLabel.style.display = "block";
+  const cursorInput = document.createElement("input");
+  cursorInput.type = "text";
+  cursorInput.maxLength = 2;
+  cursorInput.value = localStorage.getItem("dygoogleCursor") || "🖱️";
+  cursorInput.oninput = () => {
+    try {
+      document.body.style.cursor = `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg"><text y="32" font-size="32">${cursorInput.value}</text></svg>') 16 16, auto`;
+      localStorage.setItem("dygoogleCursor", cursorInput.value);
+    } catch {
+      document.body.style.cursor = "auto";
+    }
+  };
+  cursorLabel.appendChild(cursorInput);
+  menu.appendChild(cursorLabel);
 
   // --- Seasonal Animations ---
   const seasonLabel = document.createElement("label");
@@ -174,44 +253,56 @@ setInterval(() => {
   seasonLabel.appendChild(seasonSelect);
   menu.appendChild(seasonLabel);
 
-  // --- Custom Cursor ---
-  const cursorLabel = document.createElement("label");
-  cursorLabel.textContent = "Custom Cursor Emoji: ";
-  const cursorInput = document.createElement("input");
-  cursorInput.type = "text";
-  cursorInput.maxLength = 2;
-  cursorInput.value = localStorage.getItem("dygoogleCursor") || "🖱️";
-  cursorInput.oninput = () => {
-    document.body.style.cursor = `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg"><text y="32" font-size="32">${cursorInput.value}</text></svg>') 16 16, auto`;
-    localStorage.setItem("dygoogleCursor", cursorInput.value);
-  };
-  cursorLabel.appendChild(cursorInput);
-  menu.appendChild(cursorLabel);
-
   // Footer
   const footer = document.createElement("div");
   footer.textContent = "Made by Dylan.H";
-  footer.style.fontSize = "11px";
-  footer.style.marginTop = "12px";
-  footer.style.opacity = "0.7";
-  footer.style.textAlign = "center";
+  Object.assign(footer.style, { fontSize: "11px", marginTop: "12px", opacity: "0.7", textAlign: "center" });
   menu.appendChild(footer);
 
-  document.body.appendChild(menu);
-  document.body.appendChild(menuIcon);
+  // --- Gear Icon ---
+  const menuIcon = document.createElement("div");
+  menuIcon.id = "settingsIcon";
+  menuIcon.textContent = "⚙";
+  Object.assign(menuIcon.style, {
+    position: "fixed",
+    bottom: "16px",
+    right: "16px",
+    fontSize: "28px",
+    cursor: "pointer",
+    zIndex: "1500",
+    color: "#fff",
+    background: "rgba(0,0,0,0.6)",
+    borderRadius: "50%",
+    width: "48px",
+    height: "48px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    boxShadow: "0 6px 18px rgba(0,0,0,0.25)",
+    transition: "transform 0.3s ease"
+  });
 
-  // Animated menu open/close
+  // Pulsing animation
+  let pulseDirection = 1;
+  setInterval(() => {
+    const scale = 1 + 0.05 * pulseDirection;
+    menuIcon.style.transform = `scale(${scale})`;
+    pulseDirection *= -1;
+  }, 600);
+
+  // Toggle menu open/close
   menuIcon.addEventListener("click", () => {
-    if (menu.style.display === "none" || !menu.style.display) {
+    if (menu.style.transform === "scale(0)") {
       menu.style.display = "block";
-      requestAnimationFrame(() => { menu.style.transform = "scale(1)"; });
-      menuIcon.style.transform = "rotate(360deg)";
-      setTimeout(() => { menuIcon.style.transform = "rotate(0deg)"; }, 600);
+      requestAnimationFrame(() => menu.style.transform = "scale(1)");
     } else {
       menu.style.transform = "scale(0)";
       setTimeout(() => { menu.style.display = "none"; }, 400);
     }
   });
+
+  document.body.appendChild(menu);
+  document.body.appendChild(menuIcon);
 
   // Load saved settings
   applyUserBackground();
@@ -219,91 +310,13 @@ setInterval(() => {
   if (cursorInput.value) cursorInput.oninput();
 }
 
-// --- Seasonal animations (keep your existing logic) ---
+// ====== SEASONAL EFFECTS PLACEHOLDER ======
 let seasonalInterval;
-function startSeasonalBackground(type = "fall") { /* ... your code ... */ }
-function stopSeasonalBackground() { /* ... your code ... */ }
+function startSeasonalBackground(type = "fall") { /* your seasonal code */ }
+function stopSeasonalBackground() { clearInterval(seasonalInterval); }
 
-// Initialize after DOM is ready
-window.addEventListener("DOMContentLoaded", createSettingsMenu);
-// ======= Performance Mode (Reduced Lag) =======
-function enablePerformanceMode() {
-  console.log("Performance Mode enabled: heavy effects paused.");
-
-  // Stop Matrix animation
-  if (window.stopMatrix) stopMatrix();
-
-  // Stop seasonal effects
-  if (window.stopSeasonalBackground) stopSeasonalBackground();
-
-  // Remove typing glow
-  if (window.urlInput) urlInput.classList.remove('typing');
-
-  // Hide heavy UI sections temporarily
-  const containers = [imagesSection, videosSection, timelineContainer, dictionaryContainer];
-  containers.forEach(c => c.style.display = "none");
-
-  // Prevent infinite scroll from firing
-  if (window.imagesSection) {
-    imagesSection.removeEventListener('scroll', imagesSection._infiniteScrollHandler);
-  }
-
-  // Optional: cancel any running intervals (like pulsing gear)
-  if (window.performanceModeInterval) {
-    clearInterval(window.performanceModeInterval);
-    window.performanceModeInterval = null;
-  }
-}
-
-// Optional: store a reference to the original scroll handler
-if (imagesSection && !imagesSection._infiniteScrollHandler) {
-  imagesSection._infiniteScrollHandler = imagesSection._listeners?.scroll?.[0] || null;
-}
-
-// Add a toggle button to UI (optional)
-function createPerformanceToggle() {
-  const btn = document.createElement("button");
-  btn.textContent = "⚡ Performance Mode";
-  Object.assign(btn.style, {
-    position: "fixed",
-    bottom: "16px",
-    left: "16px",
-    zIndex: "1500",
-    padding: "8px 12px",
-    borderRadius: "12px",
-    border: "none",
-    cursor: "pointer",
-    background: "#ff4d4d",
-    color: "white",
-    fontWeight: "bold",
-  });
-  btn.onclick = enablePerformanceMode;
-  document.body.appendChild(btn);
-}
-
-window.addEventListener("DOMContentLoaded", createPerformanceToggle);
-// ======= Auto-Enable Performance Mode on Lag =======
-function monitorPerformance() {
-  let lastTime = performance.now();
-  const threshold = 50; // ms frame time threshold; adjust for sensitivity
-
-  function check() {
-    const now = performance.now();
-    const delta = now - lastTime;
-    lastTime = now;
-
-    // If frame time > threshold, CPU might be under pressure
-    if (delta > threshold) {
-      console.warn("High frame time detected:", delta.toFixed(1), "ms — enabling Performance Mode.");
-      enablePerformanceMode();
-      // Stop monitoring after enabling
-      return;
-    }
-    requestAnimationFrame(check);
-  }
-
-  requestAnimationFrame(check);
-}
-
-// Start monitoring after DOM loaded
-window.addEventListener("DOMContentLoaded", monitorPerformance);
+// ====== INIT ======
+window.addEventListener("DOMContentLoaded", () => {
+  createSettingsMenu();
+  monitorPerformance();
+});
