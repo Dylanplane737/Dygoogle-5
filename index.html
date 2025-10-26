@@ -625,5 +625,104 @@ logoDiv.appendChild(logoImg);
     }
   })();
 </script>
+  <script>
+/* ===== Quick Lag Fix & Background Persistence ===== */
+
+// --- Batch image appends & infinite scroll throttle ---
+(function(){
+  const originalLoadMoreImages = window.loadMoreImages;
+  let scrollThrottle;
+  const imagesSection = document.getElementById("imagesSection");
+
+  window.loadMoreImages = async function(){
+    if(!originalLoadMoreImages) return;
+    const { images } = await originalLoadMoreImages.call(window);
+    if(!images || !images.length) return;
+
+    const fragment = document.createDocumentFragment();
+    for(const src of images){
+      const img = document.createElement("img");
+      img.src = src;
+      img.loading = "lazy";
+      img.alt = window.currentQuery || "image";
+      img.onclick = () => {
+        const idx = window.imagesList.indexOf(src);
+        window.openLightbox(idx >= 0 ? idx : (window.imagesList.push(src)-1));
+      };
+      fragment.appendChild(img);
+      window.imagesList.push(src);
+    }
+    imagesSection.appendChild(fragment);
+  };
+
+  imagesSection.addEventListener("scroll", ()=>{
+    if(scrollThrottle) return;
+    scrollThrottle = setTimeout(async ()=>{
+      if(imagesSection.scrollTop + imagesSection.clientHeight >= imagesSection.scrollHeight - 30){
+        await window.loadMoreImages();
+      }
+      scrollThrottle = null;
+    }, 150);
+  });
+})();
+
+// --- API caching ---
+(function(){
+  const wikiCache = {};
+  const dictCache = {};
+  const commonsCache = {};
+
+  const originalWiki = window.getWikiSummary;
+  window.getWikiSummary = async function(query){
+    if(wikiCache[query]) return wikiCache[query];
+    const result = await originalWiki(query);
+    wikiCache[query] = result;
+    return result;
+  };
+
+  const originalDict = window.getDictionaryDefinition;
+  window.getDictionaryDefinition = async function(word){
+    if(dictCache[word]) return dictCache[word];
+    const result = await originalDict(word);
+    dictCache[word] = result;
+    return result;
+  };
+
+  const originalCommons = window.getCommonsMedia;
+  window.getCommonsMedia = async function(query, offset=0){
+    const key = query + "_" + offset;
+    if(commonsCache[key]) return commonsCache[key];
+    const result = await originalCommons(query, offset);
+    commonsCache[key] = result;
+    return result;
+  };
+})();
+
+// --- Persistent background ---
+(function(){
+  function restoreBackground(){
+    const bgImage = localStorage.getItem("dygoogleCustomBG");
+    const bgColor = localStorage.getItem("dygoogleBGColor");
+    if(bgImage){
+      document.body.style.backgroundImage = `url('${bgImage}')`;
+      document.body.style.backgroundSize = "cover";
+      document.body.style.backgroundRepeat = "no-repeat";
+    } else {
+      document.body.style.backgroundImage = "";
+    }
+    document.body.style.backgroundColor = bgColor || "#2596be";
+  }
+
+  // Call after each search
+  const originalOpenWebsite = window.openWebsite;
+  window.openWebsite = async function(){
+    if(originalOpenWebsite) await originalOpenWebsite.call(window);
+    restoreBackground();
+  };
+
+  // Restore on load
+  document.addEventListener("DOMContentLoaded", restoreBackground);
+})();
+</script>
 </body>
 </html>
