@@ -1,6 +1,7 @@
 // Dygoogle5stuff.js
 console.log("Dygoogle5stuff.js loaded!");
 
+// --- Apply user's saved background ---
 function applyUserBackground() {
   const customBG = localStorage.getItem("dygoogleCustomBG");
   const bgColor = localStorage.getItem("dygoogleBGColor");
@@ -13,46 +14,43 @@ function applyUserBackground() {
     document.body.style.backgroundImage = "";
   }
 
-  if (bgColor) {
-    document.body.style.backgroundColor = bgColor;
-  } else {
-    document.body.style.backgroundColor = ""; // default if none
-  }
-}
-
-  if (customBG) {
-    document.body.style.backgroundImage = `url('${customBG}')`;
-    document.body.style.backgroundColor = bgColor;
-  } else {
-    document.body.style.backgroundImage = "";
-    document.body.style.backgroundColor = bgColor;
-  }
+  document.body.style.backgroundColor = bgColor || ""; // fallback to default if none
 }
 
 // --- Settings menu with animated gear icon ---
 function createSettingsMenu() {
-  // Gear icon
-  const menuIcon = document.createElement("div");
-  menuIcon.id = "settingsIcon";
-  menuIcon.textContent = "⚙";
-  Object.assign(menuIcon.style, {
-    position: "fixed",
-    bottom: "16px",
-    right: "16px",
-    fontSize: "28px",
-    cursor: "pointer",
-    zIndex: "1500",
-    color: "white",
-    background: "rgba(0,0,0,0.6)",
-    borderRadius: "50%",
-    width: "48px",
-    height: "48px",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    boxShadow: "0 6px 18px rgba(0,0,0,0.25)",
-    transition: "transform 0.5s ease"
-  });
+  if (document.getElementById("settingsIcon")) return; // prevent duplicate menus
+
+ // Gear icon
+const menuIcon = document.createElement("div");
+menuIcon.id = "settingsIcon";
+menuIcon.textContent = "⚙";
+Object.assign(menuIcon.style, {
+  position: "fixed",
+  bottom: "16px",
+  right: "16px",
+  fontSize: "28px",
+  cursor: "pointer",
+  zIndex: "1500",
+  color: "white",
+  background: "rgba(0,0,0,0.6)",
+  borderRadius: "50%",
+  width: "48px",
+  height: "48px",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  boxShadow: "0 6px 18px rgba(0,0,0,0.25)",
+  transition: "transform 0.3s ease, box-shadow 0.3s ease"
+});
+
+// --- Pulsing Animation ---
+let pulseDirection = 1;
+setInterval(() => {
+  const scale = 1 + 0.05 * pulseDirection; // scale between 1.00 and 1.05
+  menuIcon.style.transform = `scale(${scale})`;
+  pulseDirection *= -1;
+}, 600);
 
   // Menu container
   const menu = document.createElement("div");
@@ -112,7 +110,7 @@ function createSettingsMenu() {
   bgInput.value = localStorage.getItem("dygoogleBGColor") || "#2596be";
   bgInput.oninput = () => {
     document.body.style.backgroundColor = bgInput.value;
-    document.body.style.backgroundImage = ""; // remove image if exists
+    document.body.style.backgroundImage = "";
     localStorage.setItem("dygoogleBGColor", bgInput.value);
     localStorage.removeItem("dygoogleCustomBG");
   };
@@ -150,6 +148,7 @@ function createSettingsMenu() {
     document.body.style.backgroundImage = "";
     localStorage.removeItem("dygoogleCustomBG");
   };
+
   menu.appendChild(uploadLabel);
   menu.appendChild(document.createElement("br"));
   menu.appendChild(removeBtn);
@@ -205,28 +204,25 @@ function createSettingsMenu() {
   menuIcon.addEventListener("click", () => {
     if (menu.style.display === "none" || !menu.style.display) {
       menu.style.display = "block";
-      requestAnimationFrame(()=>{ menu.style.transform = "scale(1)"; });
+      requestAnimationFrame(() => { menu.style.transform = "scale(1)"; });
       menuIcon.style.transform = "rotate(360deg)";
-      setTimeout(()=>{ menuIcon.style.transform = "rotate(0deg)"; }, 600);
+      setTimeout(() => { menuIcon.style.transform = "rotate(0deg)"; }, 600);
     } else {
       menu.style.transform = "scale(0)";
-      setTimeout(()=>{ menu.style.display = "none"; }, 400);
+      setTimeout(() => { menu.style.display = "none"; }, 400);
     }
   });
 
-  // Load saved user background
+  // Load saved settings
   applyUserBackground();
-
-  // Load saved season
   if (seasonSelect.value !== "none") startSeasonalBackground(seasonSelect.value);
-
-  // Load saved cursor
   if (cursorInput.value) cursorInput.oninput();
 }
 
-// --- Seasonal animations (unchanged) ---
+// --- Seasonal animations (keep your existing logic) ---
 let seasonalInterval;
-function startSeasonalBackground(type = "fall") { /* ... existing code ... */ }
-function stopSeasonalBackground() { /* ... existing code ... */ }
+function startSeasonalBackground(type = "fall") { /* ... your code ... */ }
+function stopSeasonalBackground() { /* ... your code ... */ }
 
+// Initialize after DOM is ready
 window.addEventListener("DOMContentLoaded", createSettingsMenu);
