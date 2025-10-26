@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>Dygoogle 5</title>
+<title>Nova 5</title>
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <style>
   /* Basic layout */
@@ -74,7 +74,7 @@
   /* Matrix canvas (overlay) */
   canvas#matrixCanvas { position:fixed; inset:0; z-index:1200; pointer-events:none; display:none; }
 
-  /* Typing glow (Option B) */
+  /* Typing glow */
   input#urlInput.typing {
     animation: neonPulse 1s ease-in-out infinite alternate;
     box-shadow: 0 0 30px rgba(0,160,255,0.35), 0 0 60px rgba(0,200,255,0.20);
@@ -99,7 +99,7 @@
 </style>
 </head>
 <body>
-  <header><div class="logo">Dygoogle!</div></header>
+  <header><div class="logo">Nova!</div></header>
 
   <main>
     <section class="search-wrap">
@@ -288,31 +288,6 @@ async function getDictionaryDefinition(word){
   } catch { return null; }
 }
 
-// --- News (NewsAPI) ---
-async function loadNews(query){
-  newsResults.innerHTML = ""; newsContainer.style.display = "none";
-  if (!NEWS_API_KEY || NEWS_API_KEY === "YOUR_API_KEY_HERE") return;
-  try {
-    const url = `https://newsapi.org/v2/everything?q=${encodeURIComponent(query)}&pageSize=6&sortBy=publishedAt&language=en&apiKey=${NEWS_API_KEY}`;
-    const res = await fetch(url);
-    if (!res.ok) throw new Error("news fetch failed " + res.status);
-    const data = await res.json();
-    if (!data.articles || !data.articles.length){ newsResults.innerHTML = "<p>No recent news found.</p>"; newsContainer.style.display = "block"; return; }
-    newsResults.innerHTML = data.articles.slice(0,6).map(a=>`
-      <div class="news-item">
-        <a href="${a.url}" target="_blank" rel="noopener">${escapeHtml(a.title||"Untitled")}</a>
-        <div style="color:#d6eefb; font-size:13px;">${escapeHtml(a.source.name||"")}${a.publishedAt ? " • "+(new Date(a.publishedAt)).toLocaleString() : ""}</div>
-        <p style="margin:6px 0 0 0; color:#e8f6ff;">${escapeHtml(a.description||"")}</p>
-      </div>
-    `).join("");
-    newsContainer.style.display = "block";
-  } catch (err) {
-    console.warn("loadNews failed (CORS or key):", err);
-    newsResults.innerHTML = `<p style="color:#ffd4d4">News unavailable (CORS/server). Try hosting on GitHub Pages or use a server-side proxy.</p>`;
-    newsContainer.style.display = "block";
-  }
-}
-
 // --- Timeline extractor (robust-ish) ---
 function extractTimelineFromText(text){
   if (!text) return [];
@@ -442,8 +417,8 @@ function checkEasterEggs(input){
   if (lower === "rickroll"){ rickrollContainer.style.display = "block"; window.scrollTo({top:0,behavior:"smooth"}); return true; }
   if (lower === "matrix"){ startMatrix(); return true; }
   if (lower === "pong"){ window.open("https://pong-2d.vercel.app","_blank"); return true; }
-  if (lower === "nyancat"){ window.open("https://www.nyan.cat","_blank"); return true; }
-  if (lower === "do a barrel roll"){ document.body.style.transition = "transform 1.6s"; document.body.style.transform = "rotate(360deg)"; setTimeout(()=>{ document.body.style.transform = ""; }, 1600); return true; }
+  if (lower === ":3"){ window.open("https://www.nyan.cat","_blank"); return true; }
+  if (lower === "barrel roll"){ document.body.style.transition = "transform 1.6s"; document.body.style.transform = "rotate(360deg)"; setTimeout(()=>{ document.body.style.transform = ""; }, 1600); return true; }
   if (lower === "doge"){ imagesSection.innerHTML = '<img src="https://dogecoin.com/assets/img/dogecoin-300.png" style="width:160px;height:160px;object-fit:cover;border-radius:8px"/>'; return true; }
   return false;
 }
@@ -476,7 +451,7 @@ async function openWebsite(){
   try {
     // 1) Wiki summary
     const summary = await getWikiSummary(input);
-    if (!summary) { alert("No Wikipedia article found for your query."); return; }
+    if (!summary) { alert("No Wikipedia article found for your Search :(."); return; }
     wikiSummaryEl.innerHTML = `<h2 style="margin-top:0">${escapeHtml(summary.title)}</h2>` +
       `${summary.thumbnail ? `<img src="${summary.thumbnail}" alt="${escapeHtml(summary.title)}">` : ""}` +
       `<p>${escapeHtml(summary.extract)}</p>` +
