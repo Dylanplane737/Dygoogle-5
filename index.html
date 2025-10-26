@@ -564,5 +564,29 @@ logoImg.style.width = "160px"; // adjust size
 logoImg.style.height = "auto"; // maintain aspect ratio
 logoDiv.appendChild(logoImg);
 </script>
+  <script>
+  // ======= Logo fix =======
+  (function(){
+    const logoDiv = document.querySelector('.logo');
+    if (logoDiv) {
+      logoDiv.innerHTML = ''; // remove any text
+      const logoImg = document.createElement('img');
+      logoImg.src = "New Project (2).png"; // keep your original path
+      logoImg.alt = "Nova Logo";
+      logoImg.style.width = "160px";
+      logoImg.style.height = "auto";
+      logoImg.style.display = "block";
+      logoImg.style.margin = "0 auto 16px";
+      logoDiv.appendChild(logoImg);
+    }
+  })();
+
+  // ======= newsContainer fix =======
+  (function(){
+    if (typeof newsContainer === 'undefined') {
+      window.newsContainer = { style: { display: "none" } };
+    }
+  })();
+</script>
 </body>
 </html>
