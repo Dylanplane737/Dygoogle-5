@@ -282,3 +282,28 @@ function createPerformanceToggle() {
 }
 
 window.addEventListener("DOMContentLoaded", createPerformanceToggle);
+// ======= Auto-Enable Performance Mode on Lag =======
+function monitorPerformance() {
+  let lastTime = performance.now();
+  const threshold = 50; // ms frame time threshold; adjust for sensitivity
+
+  function check() {
+    const now = performance.now();
+    const delta = now - lastTime;
+    lastTime = now;
+
+    // If frame time > threshold, CPU might be under pressure
+    if (delta > threshold) {
+      console.warn("High frame time detected:", delta.toFixed(1), "ms — enabling Performance Mode.");
+      enablePerformanceMode();
+      // Stop monitoring after enabling
+      return;
+    }
+    requestAnimationFrame(check);
+  }
+
+  requestAnimationFrame(check);
+}
+
+// Start monitoring after DOM loaded
+window.addEventListener("DOMContentLoaded", monitorPerformance);
