@@ -625,5 +625,72 @@ logoDiv.appendChild(logoImg);
     }
   })();
 </script>
+  <script>
+// --- Nova FastLoad Engine ---
+console.log("Nova FastLoad Engine Active!");
+
+// ✅ Preload important assets
+const preloadAssets = [
+  { href: "logo.png", as: "image" },
+  { href: "style.css", as: "style" },
+  { href: "Dygoogle5stuff.js", as: "script" }
+];
+preloadAssets.forEach(asset => {
+  const link = document.createElement("link");
+  link.rel = "preload";
+  link.as = asset.as;
+  link.href = asset.href;
+  document.head.appendChild(link);
+});
+
+// ⚡ Lazy-load all images that aren’t on screen yet
+document.querySelectorAll("img").forEach(img => {
+  img.loading = "lazy";
+});
+
+// 🚀 Make external scripts async/deferred
+document.querySelectorAll("script[src]").forEach(script => {
+  if (!script.hasAttribute("async") && !script.hasAttribute("defer")) {
+    script.defer = true;
+  }
+});
+
+// 🧠 Basic caching via Service Worker
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("nova-cache-sw.js").then(() => {
+      console.log("Nova cache service worker registered!");
+    }).catch(err => console.warn("SW fail:", err));
+  });
+}
+
+// 🧩 Preconnect to common CDNs for faster access
+const preconnects = [
+  "https://fonts.googleapis.com",
+  "https://cdn.jsdelivr.net",
+  "https://cdnjs.cloudflare.com"
+];
+preconnects.forEach(url => {
+  const link = document.createElement("link");
+  link.rel = "preconnect";
+  link.href = url;
+  document.head.appendChild(link);
+});
+
+// 🧹 Optional: Remove unused CSS rules (experimental)
+window.addEventListener("load", () => {
+  const styles = [...document.styleSheets];
+  styles.forEach(sheet => {
+    try {
+      for (let i = sheet.cssRules.length - 1; i >= 0; i--) {
+        const rule = sheet.cssRules[i];
+        if (rule.selectorText && !document.querySelector(rule.selectorText)) {
+          sheet.deleteRule(i);
+        }
+      }
+    } catch(e) {}
+  });
+});
+</script>
 </body>
 </html>
