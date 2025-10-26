@@ -1,4 +1,4 @@
-# Nova 5 – Smart Web Launcher  
+# Nova – Smart Web Launcher  
 
 A fun little web app i made.  
 Search websites, get instant Wikipedia summaries, related images & videos, dictionary definitions…  
