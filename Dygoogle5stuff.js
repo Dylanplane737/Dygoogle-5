@@ -320,3 +320,20 @@ window.addEventListener("DOMContentLoaded", () => {
   createSettingsMenu();
   monitorPerformance();
 });
+// ======= Disable Custom Cursor to Reduce Lag =======
+function disableCustomCursor() {
+  // Reset cursor to default
+  document.body.style.cursor = "default";
+
+  // Remove any input listeners related to custom cursor
+  const cursorInput = document.querySelector('input[type="text"][value^="🖱️"]');
+  if (cursorInput) {
+    cursorInput.disabled = true; // prevents updates
+    cursorInput.style.opacity = 0.5;
+  }
+
+  console.log("Custom cursors disabled for performance.");
+}
+
+// Call it immediately or inside performance mode
+disableCustomCursor();
