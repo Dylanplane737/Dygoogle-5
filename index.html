@@ -1,50 +1,46 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="utf-8" />
   <title>Nova 5</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <link rel="icon" type="image/png" href="falcon.png">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <header>
-    <div class="logo"></div>
+    <div class="logo"></div> <!-- Logo inserted by logo.js -->
   </header>
 
   <main>
-    <!-- Search -->
     <section class="search-wrap">
-      <input id="urlInput" placeholder="Search..." autocomplete="off">
+      <input id="urlInput" placeholder="Search..." autocomplete="off" />
       <div id="suggestionBox" class="suggestions" role="listbox"></div>
     </section>
 
-    <!-- Open button & spinner -->
     <div style="text-align:center;">
-      <button id="openBtn">Open</button>
+      <button id="openBtn" onclick="openWebsite()">Open</button>
     </div>
+
     <div id="loadingSpinner" class="spinner" aria-hidden="true"></div>
 
-    <!-- Results -->
     <section id="resultContainer">
       <article id="wikiSummary"></article>
       <aside id="relatedMedia">
-        <h3>Related Images</h3>
+        <h3 style="margin-top:0">Related Images</h3>
         <div id="imagesSection" class="media-section" aria-live="polite"></div>
-        <h3>Related Videos</h3>
+        <h3 style="margin:0 0 6px 0">Related Videos</h3>
         <div id="videosSection" class="media-section"></div>
       </aside>
     </section>
 
-    <!-- Dictionary -->
     <section id="dictionaryContainer">
-      <h3>Dictionary Lookup</h3>
+      <h3 style="margin-top:0">Dictionary Lookup</h3>
       <div id="dictionaryResults"></div>
     </section>
 
-    <!-- Timeline -->
     <section id="timelineContainer">
-      <h3>Timeline</h3>
+      <h3 style="margin-top:0">Timeline</h3>
       <div id="timelineList" class="timeline-list"></div>
     </section>
 
@@ -52,24 +48,22 @@
     <div id="lightbox" aria-hidden="true">
       <span class="close" id="closeLightbox" title="Close">&times;</span>
       <span class="nav prev" id="lightPrev" title="Previous">&#10094;</span>
-      <img id="lightboxImg" alt="Expanded image">
+      <img id="lightboxImg" alt="Expanded image"/>
       <span class="nav next" id="lightNext" title="Next">&#10095;</span>
     </div>
 
     <!-- Rickroll fallback -->
-    <section id="rickrollContainer" style="display:none;">
+    <section id="rickrollContainer" style="display:none; margin-top:20px;">
       <h3>Surprise!</h3>
-      <img src="https://upload.wikimedia.org/wikipedia/commons/3/3d/Rick_Astley_-_Never_Gonna_Give_You_Up.gif" 
-           alt="Rickroll GIF" style="max-width:520px;border-radius:12px;">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/3/3d/Rick_Astley_-_Never_Gonna_Give_You_Up.gif" alt="Rickroll GIF" style="max-width:520px;border-radius:12px;"/>
     </section>
 
-    <!-- Matrix canvas -->
+    <!-- Matrix canvas overlay -->
     <canvas id="matrixCanvas"></canvas>
   </main>
 
-  <!-- Scripts -->
-  <script src="Dygoogle5stuff.js" type="module"></script>
-  <script src="logo.js" type="module"></script>
-  <script src="main.js" type="module"></script>
+  <script src="logo.js"></script>
+  <script src="Main.js"></script>
 </body>
 </html>
+
