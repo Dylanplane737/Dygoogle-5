@@ -1,20 +1,22 @@
 // Dygoogle5stuff.js
 console.log("Dygoogle5stuff.js loaded!");
 
-// --- Apply user's saved background ---
 function applyUserBackground() {
-  const customBG = localStorage.getItem("dygoogleCustomBG");      // user's custom image (if any)
-  const bgColor = localStorage.getItem("dygoogleBGColor");        // user's preferred background color
+  const customBG = localStorage.getItem("dygoogleCustomBG");
+  const bgColor = localStorage.getItem("dygoogleBGColor");
 
   if (customBG) {
     document.body.style.backgroundImage = `url('${customBG}')`;
+    document.body.style.backgroundSize = "cover";
+    document.body.style.backgroundRepeat = "no-repeat";
   } else {
     document.body.style.backgroundImage = "";
   }
 
-  // Only apply color if user has set one; otherwise leave as-is
   if (bgColor) {
     document.body.style.backgroundColor = bgColor;
+  } else {
+    document.body.style.backgroundColor = ""; // default if none
   }
 }
 
