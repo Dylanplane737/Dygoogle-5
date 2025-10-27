@@ -4,15 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Nova</title>
-
-  <!-- Favicon -->
   <link rel="icon" type="image/png" href="falcon.png">
-
-  <!-- Styles -->
   <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
+
   <!-- Logo -->
   <div class="logo-container">
     <img src="Novalogo.png" alt="Nova Logo" class="logo">
@@ -25,30 +21,26 @@
   </div>
 
   <!-- Results -->
-  <div id="resultContainer"></div>
+  <div id="resultContainer">
+    <section id="wikiSummary"></section>
+    <section id="dictionary"></section>
+    <section id="timeline"></section>
+    <aside id="relatedMedia">
+      <h3>Images</h3>
+      <div id="imagesSection" class="media-section"></div>
+      <h3>Videos</h3>
+      <div id="videosSection" class="media-section"></div>
+    </aside>
+  </div>
 
-  <!-- Scripts -->
+  <!-- Lightbox -->
+  <div id="lightbox" aria-hidden="true">
+    <span class="close" id="closeLightbox">&times;</span>
+    <span class="nav prev" id="lightPrev">&#10094;</span>
+    <img id="lightboxImg" alt="Expanded image"/>
+    <span class="nav next" id="lightNext">&#10095;</span>
+  </div>
+
   <script src="Main.js"></script>
-  <!-- <script src="Main1.js"></script> Optional for overflow -->
-  <!-- Results -->
-<div id="resultContainer">
-  <section id="wikiSummary"></section>
-  <section id="dictionary"></section>
-  <section id="timeline"></section>
-  <aside id="relatedMedia">
-    <h3>Images</h3>
-    <div id="imagesSection" class="media-section"></div>
-    <h3>Videos</h3>
-    <div id="videosSection" class="media-section"></div>
-  </aside>
-</div>
-
-<!-- Lightbox for images -->
-<div id="lightbox" aria-hidden="true">
-  <span class="close" id="closeLightbox">&times;</span>
-  <span class="nav prev" id="lightPrev">&#10094;</span>
-  <img id="lightboxImg" alt="Expanded image"/>
-  <span class="nav next" id="lightNext">&#10095;</span>
-</div>
 </body>
 </html>
