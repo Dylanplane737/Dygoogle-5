@@ -9,7 +9,7 @@ let performanceModeActive = false;
 // Apply user's saved background
 function applyUserBackground() {
   const customBG = localStorage.getItem("dygoogleCustomBG");
-  const bgColor = localStorage.getItem("dygoogleBGColor");
+  const bgColor = localStorage.getItem("dygoogleBGColor") || "#2596be";
 
   if (customBG) {
     document.body.style.backgroundImage = `url('${customBG}')`;
@@ -18,7 +18,7 @@ function applyUserBackground() {
   } else {
     document.body.style.backgroundImage = "";
   }
-  document.body.style.backgroundColor = bgColor || "#2596be";
+  document.body.style.backgroundColor = bgColor;
 }
 
 // Enable Performance Mode (Reduced Lag)
@@ -26,20 +26,12 @@ function enablePerformanceMode() {
   console.log("Performance Mode enabled: heavy effects paused.");
   performanceModeActive = true;
 
-  // Stop Matrix animation
+  // Stop heavy effects
   if (window.stopMatrix) stopMatrix();
-
-  // Stop seasonal effects
   if (window.stopSeasonalBackground) stopSeasonalBackground();
 
   // Hide heavy UI sections temporarily
-  [window.imagesSection, window.videosSection, window.].forEach(c => c && (c.style.display = "none"));
-
-  // Stop pulsing gear animation
-  if (window.performanceModeInterval) {
-    clearInterval(window.performanceModeInterval);
-    window.performanceModeInterval = null;
-  }
+  [window.imagesSection, window.videosSection].forEach(c => c && (c.style.display = "none"));
 
   updatePerformanceStatusUI();
 }
@@ -50,7 +42,7 @@ function disablePerformanceMode() {
   performanceModeActive = false;
 
   // Restore UI sections
-  [window.imagesSection, window.videosSection,].forEach(c => c && (c.style.display = ""));
+  [window.imagesSection, window.videosSection].forEach(c => c && (c.style.display = ""));
 
   // Restart seasonal effects
   const season = localStorage.getItem("dygoogleSeason") || "none";
@@ -77,6 +69,7 @@ function monitorPerformance() {
     const now = performance.now();
     const delta = now - lastTime;
     lastTime = now;
+
     if (delta > threshold && !performanceModeActive) {
       console.warn("High frame time detected:", delta.toFixed(1), "ms — enabling Performance Mode.");
       enablePerformanceMode();
@@ -214,25 +207,6 @@ function createSettingsMenu() {
   };
   menu.appendChild(removeBtn);
 
-  // --- Custom Cursor ---
-  const cursorLabel = document.createElement("label");
-  cursorLabel.textContent = "Custom Cursor Emoji: ";
-  cursorLabel.style.display = "block";
-  const cursorInput = document.createElement("input");
-  cursorInput.type = "text";
-  cursorInput.maxLength = 2;
-  cursorInput.value = localStorage.getItem("dygoogleCursor") || "🖱️";
-  cursorInput.oninput = () => {
-    try {
-      document.body.style.cursor = `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg"><text y="32" font-size="32">${cursorInput.value}</text></svg>') 16 16, auto`;
-      localStorage.setItem("dygoogleCursor", cursorInput.value);
-    } catch {
-      document.body.style.cursor = "auto";
-    }
-  };
-  cursorLabel.appendChild(cursorInput);
-  menu.appendChild(cursorLabel);
-
   // --- Seasonal Animations ---
   const seasonLabel = document.createElement("label");
   seasonLabel.textContent = "Seasonal Animation: ";
@@ -269,7 +243,7 @@ function createSettingsMenu() {
     right: "16px",
     fontSize: "28px",
     cursor: "pointer",
-    zIndex: "1500",
+    zIndex: 1500,
     color: "#fff",
     background: "rgba(0,0,0,0.6)",
     borderRadius: "50%",
@@ -307,7 +281,6 @@ function createSettingsMenu() {
   // Load saved settings
   applyUserBackground();
   if (seasonSelect.value !== "none") startSeasonalBackground(seasonSelect.value);
-  if (cursorInput.value) cursorInput.oninput();
 }
 
 // ====== SEASONAL EFFECTS PLACEHOLDER ======
@@ -315,25 +288,45 @@ let seasonalInterval;
 function startSeasonalBackground(type = "fall") { /* your seasonal code */ }
 function stopSeasonalBackground() { clearInterval(seasonalInterval); }
 
+// ====== OPEN BUTTON + ENTER KEY ======
+function setupOpenButton() {
+  const openBtn = document.getElementById("openBtn");
+  const urlInput = document.getElementById("urlInput");
+
+  if (!openBtn || !urlInput) return;
+
+  // Style Open button
+  Object.assign(openBtn.style, {
+    padding: "10px 24px",
+    borderRadius: "24px",
+    border: "2px solid #0ff",
+    background: "linear-gradient(145deg, #111, #222)",
+    color: "#0ff",
+    fontWeight: "bold",
+    fontSize: "16px",
+    cursor: "pointer",
+    boxShadow: "0 0 6px #0ff, 0 0 12px #0ff inset",
+    transition: "all 0.2s ease"
+  });
+
+  openBtn.addEventListener("mouseenter", () => {
+    openBtn.style.transform = "scale(1.05)";
+    openBtn.style.boxShadow = "0 0 12px #0ff, 0 0 18px #0ff inset";
+  });
+  openBtn.addEventListener("mouseleave", () => {
+    openBtn.style.transform = "scale(1)";
+    openBtn.style.boxShadow = "0 0 6px #0ff, 0 0 12px #0ff inset";
+  });
+
+  // Enter shortcut
+  urlInput.addEventListener("keydown", e => {
+    if (e.key === "Enter") openBtn.click();
+  });
+}
+
 // ====== INIT ======
 window.addEventListener("DOMContentLoaded", () => {
   createSettingsMenu();
+  setupOpenButton();
   monitorPerformance();
 });
-// ======= Disable Custom Cursor to Reduce Lag =======
-function disableCustomCursor() {
-  // Reset cursor to default
-  document.body.style.cursor = "default";
-
-  // Remove any input listeners related to custom cursor
-  const cursorInput = document.querySelector('input[type="text"][value^="🖱️"]');
-  if (cursorInput) {
-    cursorInput.disabled = true; // prevents updates
-    cursorInput.style.opacity = 0.5;
-  }
-
-  console.log("Custom cursors disabled for performance.");
-}
-
-// Call it immediately or inside performance mode
-disableCustomCursor();
