@@ -142,10 +142,6 @@
 
   <main>
     
-    <div style="text-align:center;">
-      <button id="openBtn" onclick="openWebsite()">Open</button>
-    </div>
-
     <div id="loadingSpinner" class="spinner" aria-hidden="true"></div>
 
     <section id="resultContainer">
@@ -723,6 +719,41 @@ logoDiv.appendChild(logoImg);
   // Restore on load
   document.addEventListener("DOMContentLoaded", restoreBackground);
 })();
+</script>
+  <div style="text-align:center;">
+  <button id="openBtn" onclick="openWebsite()">Open</button>
+</div>
+
+<script>
+window.addEventListener("DOMContentLoaded", () => {
+  const openBtn = document.getElementById("openBtn");
+  Object.assign(openBtn.style, {
+    padding: "10px 24px",
+    borderRadius: "24px",
+    border: "2px solid #0ff",
+    background: "linear-gradient(145deg, #111, #222)",
+    color: "#0ff",
+    fontWeight: "bold",
+    fontSize: "16px",
+    cursor: "pointer",
+    boxShadow: "0 0 6px #0ff, 0 0 12px #0ff inset",
+    transition: "all 0.2s ease",
+  });
+
+  openBtn.addEventListener("mouseenter", () => {
+    openBtn.style.transform = "scale(1.05)";
+    openBtn.style.boxShadow = "0 0 12px #0ff, 0 0 18px #0ff inset";
+  });
+  openBtn.addEventListener("mouseleave", () => {
+    openBtn.style.transform = "scale(1)";
+    openBtn.style.boxShadow = "0 0 6px #0ff, 0 0 12px #0ff inset";
+  });
+
+  const urlInput = document.getElementById("urlInput");
+  urlInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") openBtn.click();
+  });
+});
 </script>
 </body>
 </html>
