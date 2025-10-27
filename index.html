@@ -153,7 +153,28 @@ document.addEventListener("keydown", e=>{
     if(e.key==="ArrowLeft") lightPrevFn();
   }
 });
-
+// --- Wikipedia summary fetch ---
+async function getWikiSummary(query){
+  if (!query) return null;
+  try {
+    const url = `https://en.wikipedia.org/w/api.php?action=query&origin=*&format=json&prop=extracts|pageimages&exintro&explaintext&piprop=thumbnail&pithumbsize=400&titles=${encodeURIComponent(query)}`;
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    const data = await res.json();
+    const pages = data.query?.pages;
+    if (!pages) return null;
+    const page = Object.values(pages)[0];
+    if (!page || page.missing) return null;
+    return {
+      title: page.title,
+      extract: page.extract || "",
+      thumbnail: page.thumbnail?.source || null,
+      fullurl: `https://en.wikipedia.org/wiki/${encodeURIComponent(page.title)}`
+    };
+  } catch {
+    return null;
+  }
+}
 /* === Open Website === */
 async function openWebsite(){
   const input = urlInput.value.trim();
