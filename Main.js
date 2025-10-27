@@ -3,13 +3,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ===== Logo Animation =====
   const logoDiv = document.querySelector('.logo');
-  const logoText = 'Nova';
-  logoDiv.innerHTML = '';
-  logoText.split('').forEach(char => {
-    const span = document.createElement('span');
-    span.textContent = char;
-    logoDiv.appendChild(span);
-  });
+  if (logoDiv) {
+    const logoText = 'Nova';
+    logoDiv.innerHTML = '';
+    logoText.split('').forEach((char, i) => {
+      const span = document.createElement('span');
+      span.textContent = char;
+      span.style.opacity = 0;
+      span.style.transition = `opacity 0.3s ${i * 0.1}s`;
+      logoDiv.appendChild(span);
+      setTimeout(() => span.style.opacity = 1, 50);
+    });
+  }
 
   // ===== Progressive Images =====
   const progressiveImages = document.querySelectorAll('.progressive');
@@ -21,22 +26,47 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ===== Input Focus Effect =====
   const input = document.getElementById('urlInput');
-  input.addEventListener('input', () => {
-    input.classList.toggle('typing', input.value.length > 0);
+  if (input) {
+    input.addEventListener('input', () => {
+      input.classList.toggle('typing', input.value.length > 0);
+    });
+  }
+
+ // ===== Open Button =====
+const openBtn = document.getElementById('openBtn');
+if (openBtn && input) {
+  // Apply logo-style gradient
+  openBtn.style.background = 'linear-gradient(90deg, #00f, #0ff, #0f0, #ff0, #f00, #f0f)';
+  openBtn.style.color = '#fff';
+  openBtn.style.border = 'none';
+  openBtn.style.padding = '10px 20px';
+  openBtn.style.borderRadius = '8px';
+  openBtn.style.cursor = 'pointer';
+  openBtn.style.fontWeight = 'bold';
+  openBtn.style.transition = 'transform 0.2s, filter 0.2s';
+  
+  // Hover effect
+  openBtn.addEventListener('mouseover', () => {
+    openBtn.style.filter = 'brightness(1.2)';
+    openBtn.style.transform = 'scale(1.05)';
+  });
+  openBtn.addEventListener('mouseout', () => {
+    openBtn.style.filter = 'brightness(1)';
+    openBtn.style.transform = 'scale(1)';
   });
 
-  // ===== Open Button =====
-  const openBtn = document.getElementById('openBtn');
+  // Click action
   openBtn.addEventListener('click', () => {
     const url = input.value.trim();
     if (url) window.open(url.startsWith('http') ? url : 'https://' + url, '_blank');
   });
+}
 
   // ===== Background Persistence =====
   const savedBG = localStorage.getItem('customBG');
   if (savedBG) document.body.style.background = savedBG;
 
-  // ===== Matrix Canvas Animation (if used) =====
+  // ===== Matrix Canvas Animation =====
   const matrixCanvas = document.getElementById('matrixCanvas');
   if (matrixCanvas) {
     const ctx = matrixCanvas.getContext('2d');
@@ -52,8 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
       ctx.font = '18px monospace';
 
       drops.forEach((y, i) => {
-        const text = String.fromCharCode(Math.random() * 128);
-        ctx.fillText(text, i * 20, y * 20);
+        ctx.fillText(String.fromCharCode(Math.random() * 128), i * 20, y * 20);
         drops[i] = y * 20 > height && Math.random() > 0.975 ? 0 : y + 1;
       });
       requestAnimationFrame(drawMatrix);
@@ -69,11 +98,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // ===== Media (Images & Videos) =====
   const imagesSection = document.getElementById('imagesSection');
   const videosSection = document.getElementById('videosSection');
-  let imagesList = [];   // full-size images for lightbox
-  let videoList = [];    // video URLs
+  let imagesList = [];
+  let videoList = [];
   let currentLightIndex = -1;
 
-  const BATCH_SIZE = 10;  
+  const BATCH_SIZE = 10;
   let imgOffset = 0;
 
   async function appendImagesBatch(newImages) {
@@ -87,7 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
       img.onclick = () => openLightbox(i);
       fragment.appendChild(img);
     }
-    imagesSection.appendChild(fragment);
+    if (imagesSection) imagesSection.appendChild(fragment);
     lazyLoadMedia();
     imgOffset += BATCH_SIZE;
   }
@@ -108,45 +137,57 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('scroll', throttle(lazyLoadMedia, 150));
 
   // ===== Infinite Scroll for Images =====
-  imagesSection.addEventListener('scroll', throttle(() => {
-    if (imagesSection.scrollTop + imagesSection.clientHeight >= imagesSection.scrollHeight - 50) {
-      appendImagesBatch([]);
-    }
-  }, 100));
+  if (imagesSection) {
+    imagesSection.addEventListener('scroll', throttle(() => {
+      if (imagesSection.scrollTop + imagesSection.clientHeight >= imagesSection.scrollHeight - 50) {
+        appendImagesBatch([]);
+      }
+    }, 100));
+  }
 
   // ===== Lightbox =====
   function openLightbox(index) {
     currentLightIndex = index;
     const lightbox = document.getElementById('lightbox');
     const lightboxImg = document.getElementById('lightboxImg');
-    lightboxImg.src = imagesList[index];
-    lightbox.classList.add('show');
-    lightbox.setAttribute('aria-hidden', 'false');
+    if (lightbox && lightboxImg) {
+      lightboxImg.src = imagesList[index];
+      lightbox.classList.add('show');
+      lightbox.setAttribute('aria-hidden', 'false');
+    }
   }
 
   function closeLightboxFn() {
     const lightbox = document.getElementById('lightbox');
-    lightbox.classList.remove('show');
-    lightbox.setAttribute('aria-hidden', 'true');
+    if (lightbox) {
+      lightbox.classList.remove('show');
+      lightbox.setAttribute('aria-hidden', 'true');
+    }
     currentLightIndex = -1;
   }
 
-  document.getElementById('lightNext').onclick = () => {
+  const lightNext = document.getElementById('lightNext');
+  const lightPrev = document.getElementById('lightPrev');
+  const closeLightboxBtn = document.getElementById('closeLightbox');
+
+  if (lightNext) lightNext.onclick = () => {
     if (imagesList.length === 0) return;
     currentLightIndex = (currentLightIndex + 1) % imagesList.length;
     document.getElementById('lightboxImg').src = imagesList[currentLightIndex];
   };
-  document.getElementById('lightPrev').onclick = () => {
+  if (lightPrev) lightPrev.onclick = () => {
     if (imagesList.length === 0) return;
     currentLightIndex = (currentLightIndex - 1 + imagesList.length) % imagesList.length;
     document.getElementById('lightboxImg').src = imagesList[currentLightIndex];
   };
-  document.getElementById('closeLightbox').onclick = closeLightboxFn;
+  if (closeLightboxBtn) closeLightboxBtn.onclick = closeLightboxFn;
+
   document.addEventListener('keydown', (e) => {
-    if (document.getElementById('lightbox').classList.contains('show')) {
+    const lightbox = document.getElementById('lightbox');
+    if (lightbox && lightbox.classList.contains('show')) {
       if (e.key === 'Escape') closeLightboxFn();
-      if (e.key === 'ArrowRight') document.getElementById('lightNext').click();
-      if (e.key === 'ArrowLeft') document.getElementById('lightPrev').click();
+      if (e.key === 'ArrowRight') lightNext?.click();
+      if (e.key === 'ArrowLeft') lightPrev?.click();
     }
   });
 
