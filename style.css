@@ -1,1 +1,31 @@
-Css Comeing soon!
+body {
+  font-family: "Pixelify Sans", Arial, sans-serif;
+  background-color: #2596be;
+  color: white;
+  text-align: center;
+  margin: 32px 12px;
+  transition: background 0.3s ease;
+}
+
+.logo { width:180px; height:auto; margin: 20px auto; display:block; }
+
+.search-wrap { max-width: 560px; margin: 20px auto; position: relative; }
+input#searchInput { width: 100%; padding: 12px 16px; border-radius: 999px; border: 1px solid rgba(0,0,0,0.1); font-size:16px; }
+button#searchButton { margin-top:12px; padding: 12px 26px; border-radius:28px; border:none; cursor:pointer; background:#0f75a8; color:white; font-weight:bold; }
+
+#resultContainer { display:flex; flex-wrap:wrap; gap:20px; justify-content:center; margin-top:28px; }
+#wikiSummary, #dictionary, #timeline { width: 44%; min-width:260px; padding:18px; border-radius:12px; background: rgba(0,0,0,0.28); max-height:720px; overflow:auto; text-align:left; }
+.media-section { display:flex; flex-wrap:wrap; gap:10px; max-height:320px; overflow:auto; }
+
+.media-section img, .media-section video {
+  width:160px; height:110px; object-fit:cover; border-radius:8px; cursor:pointer; box-shadow:0 4px 10px rgba(0,0,0,0.25); transition: transform 0.12s ease;
+}
+.media-section img:hover, .media-section video:hover { transform: scale(1.06); }
+
+/* Lightbox */
+#lightbox { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.92); z-index:1000; align-items:center; justify-content:center; }
+#lightbox.show { display:flex; }
+#lightbox img { max-width:92%; max-height:86%; border-radius:10px; box-shadow:0 10px 40px rgba(0,0,0,0.6); }
+#lightbox .close, .nav { color:white; cursor:pointer; font-size:28px; user-select:none; position:fixed; }
+#lightbox .nav.prev { left:16px; top:50%; transform:translateY(-50%); font-size:48px; }
+#lightbox .nav.next { right:16px; top:50%; transform:translateY(-50%); font-size:48px; }
