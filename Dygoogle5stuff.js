@@ -1,4 +1,3 @@
-// Dygoogle5stuff.js
 console.log("Dygoogle5stuff.js loaded!");
 
 // ====== GLOBAL STATE ======
@@ -6,10 +5,12 @@ let performanceModeActive = false;
 
 // ====== HELPER FUNCTIONS ======
 
-// Apply user's saved background
+// Apply user's saved background persistently
 function applyUserBackground() {
   const customBG = localStorage.getItem("dygoogleCustomBG");
   const bgColor = localStorage.getItem("dygoogleBGColor") || "#2596be";
+
+  document.body.style.backgroundColor = bgColor;
 
   if (customBG) {
     document.body.style.backgroundImage = `url('${customBG}')`;
@@ -18,40 +19,53 @@ function applyUserBackground() {
   } else {
     document.body.style.backgroundImage = "";
   }
-  document.body.style.backgroundColor = bgColor;
+
+  // Keep text/button colors readable on light/dark BGs
+  const brightness = getColorBrightness(bgColor);
+  document.body.style.color = brightness < 128 ? "#fff" : "#111";
 }
 
-// Enable Performance Mode (Reduced Lag)
+// Helper to calculate brightness from hex color
+function getColorBrightness(hex) {
+  const c = hex.substring(1);
+  const rgb = parseInt(c, 16);
+  const r = (rgb >> 16) & 0xff;
+  const g = (rgb >> 8) & 0xff;
+  const b = rgb & 0xff;
+  return (r * 299 + g * 587 + b * 114) / 1000;
+}
+
+// Always reapply background when page updates
+window.addEventListener("focus", applyUserBackground);
+window.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible") applyUserBackground();
+});
+
+// ====== PERFORMANCE MODE ======
 function enablePerformanceMode() {
   console.log("Performance Mode enabled: heavy effects paused.");
   performanceModeActive = true;
 
-  // Stop heavy effects
   if (window.stopMatrix) stopMatrix();
   if (window.stopSeasonalBackground) stopSeasonalBackground();
 
-  // Hide heavy UI sections temporarily
   [window.imagesSection, window.videosSection].forEach(c => c && (c.style.display = "none"));
 
   updatePerformanceStatusUI();
 }
 
-// Disable Performance Mode
 function disablePerformanceMode() {
   console.log("Performance Mode disabled: heavy effects restored.");
   performanceModeActive = false;
 
-  // Restore UI sections
   [window.imagesSection, window.videosSection].forEach(c => c && (c.style.display = ""));
 
-  // Restart seasonal effects
   const season = localStorage.getItem("dygoogleSeason") || "none";
   if (season !== "none") startSeasonalBackground(season);
 
   updatePerformanceStatusUI();
 }
 
-// Update Performance Mode status display in menu
 function updatePerformanceStatusUI() {
   const label = document.getElementById("performanceStatus");
   if (label) {
@@ -60,7 +74,6 @@ function updatePerformanceStatusUI() {
   }
 }
 
-// Monitor for lag automatically
 function monitorPerformance() {
   let lastTime = performance.now();
   const threshold = 50;
@@ -84,7 +97,6 @@ function monitorPerformance() {
 function createSettingsMenu() {
   if (document.getElementById("settingsIcon")) return;
 
-  // --- Menu Container ---
   const menu = document.createElement("div");
   menu.id = "settingsMenu";
   Object.assign(menu.style, {
@@ -105,20 +117,17 @@ function createSettingsMenu() {
     zIndex: 1500
   });
 
-  // --- Menu Title ---
   const title = document.createElement("h3");
   title.textContent = "Settings";
   Object.assign(title.style, { textAlign: "center", margin: "0 0 15px 0", fontWeight: "bold" });
   menu.appendChild(title);
 
-  // --- Performance Mode Status ---
   const perfStatusLabel = document.createElement("div");
   perfStatusLabel.id = "performanceStatus";
   perfStatusLabel.style.marginBottom = "10px";
   menu.appendChild(perfStatusLabel);
   updatePerformanceStatusUI();
 
-  // Toggle button
   const togglePerfBtn = document.createElement("button");
   togglePerfBtn.textContent = "Toggle Performance Mode";
   Object.assign(togglePerfBtn.style, {
@@ -153,10 +162,9 @@ function createSettingsMenu() {
   }
   presetSelect.value = localStorage.getItem("dygoogleBGColor") || "#2596be";
   presetSelect.onchange = () => {
-    document.body.style.backgroundColor = presetSelect.value;
-    document.body.style.backgroundImage = "";
     localStorage.setItem("dygoogleBGColor", presetSelect.value);
     localStorage.removeItem("dygoogleCustomBG");
+    applyUserBackground();
   };
   presetLabel.appendChild(presetSelect);
   themeContainer.appendChild(presetLabel);
@@ -169,10 +177,9 @@ function createSettingsMenu() {
   bgInput.type = "color";
   bgInput.value = localStorage.getItem("dygoogleBGColor") || "#2596be";
   bgInput.oninput = () => {
-    document.body.style.backgroundColor = bgInput.value;
-    document.body.style.backgroundImage = "";
     localStorage.setItem("dygoogleBGColor", bgInput.value);
     localStorage.removeItem("dygoogleCustomBG");
+    applyUserBackground();
   };
   bgLabel.appendChild(bgInput);
   menu.appendChild(bgLabel);
@@ -188,10 +195,8 @@ function createSettingsMenu() {
     if (!file) return;
     const reader = new FileReader();
     reader.onload = () => {
-      document.body.style.backgroundImage = `url('${reader.result}')`;
-      document.body.style.backgroundSize = "cover";
-      document.body.style.backgroundRepeat = "no-repeat";
       localStorage.setItem("dygoogleCustomBG", reader.result);
+      applyUserBackground();
     };
     reader.readAsDataURL(file);
   };
@@ -202,12 +207,11 @@ function createSettingsMenu() {
   removeBtn.textContent = "Remove BG Image";
   Object.assign(removeBtn.style, { marginTop: "6px", width: "100%", cursor: "pointer" });
   removeBtn.onclick = () => {
-    document.body.style.backgroundImage = "";
     localStorage.removeItem("dygoogleCustomBG");
+    applyUserBackground();
   };
   menu.appendChild(removeBtn);
 
-  // --- Seasonal Animations ---
   const seasonLabel = document.createElement("label");
   seasonLabel.textContent = "Seasonal Animation: ";
   seasonLabel.style.display = "block";
@@ -227,7 +231,6 @@ function createSettingsMenu() {
   seasonLabel.appendChild(seasonSelect);
   menu.appendChild(seasonLabel);
 
-  // Footer
   const footer = document.createElement("div");
   footer.textContent = "Made by Dylan.H";
   Object.assign(footer.style, { fontSize: "11px", marginTop: "12px", opacity: "0.7", textAlign: "center" });
@@ -256,7 +259,6 @@ function createSettingsMenu() {
     transition: "transform 0.3s ease"
   });
 
-  // Pulsing animation
   let pulseDirection = 1;
   setInterval(() => {
     const scale = 1 + 0.05 * pulseDirection;
@@ -264,7 +266,6 @@ function createSettingsMenu() {
     pulseDirection *= -1;
   }, 600);
 
-  // Toggle menu open/close
   menuIcon.addEventListener("click", () => {
     if (menu.style.transform === "scale(0)") {
       menu.style.display = "block";
@@ -278,47 +279,26 @@ function createSettingsMenu() {
   document.body.appendChild(menu);
   document.body.appendChild(menuIcon);
 
-  // Load saved settings
   applyUserBackground();
   if (seasonSelect.value !== "none") startSeasonalBackground(seasonSelect.value);
 }
 
 // ====== SEASONAL EFFECTS PLACEHOLDER ======
 let seasonalInterval;
-function startSeasonalBackground(type = "fall") { /* your seasonal code */ }
+function startSeasonalBackground(type = "fall") {}
 function stopSeasonalBackground() { clearInterval(seasonalInterval); }
 
-// ====== OPEN BUTTON + ENTER KEY ======
+// ====== OPEN BUTTON ======
 function setupOpenButton() {
   const openBtn = document.getElementById("openBtn");
   const urlInput = document.getElementById("urlInput");
-
   if (!openBtn || !urlInput) return;
 
-  // Style Open button
-  Object.assign(openBtn.style, {
-    padding: "10px 24px",
-    borderRadius: "24px",
-    border: "2px solid #0ff",
-    background: "linear-gradient(145deg, #111, #222)",
-    color: "#0ff",
-    fontWeight: "bold",
-    fontSize: "16px",
-    cursor: "pointer",
-    boxShadow: "0 0 6px #0ff, 0 0 12px #0ff inset",
-    transition: "all 0.2s ease"
+  openBtn.addEventListener("click", () => {
+    const url = urlInput.value.trim();
+    if (url) window.open(url.startsWith("http") ? url : "https://" + url, "_blank");
   });
 
-  openBtn.addEventListener("mouseenter", () => {
-    openBtn.style.transform = "scale(1.05)";
-    openBtn.style.boxShadow = "0 0 12px #0ff, 0 0 18px #0ff inset";
-  });
-  openBtn.addEventListener("mouseleave", () => {
-    openBtn.style.transform = "scale(1)";
-    openBtn.style.boxShadow = "0 0 6px #0ff, 0 0 12px #0ff inset";
-  });
-
-  // Enter shortcut
   urlInput.addEventListener("keydown", e => {
     if (e.key === "Enter") openBtn.click();
   });
@@ -329,4 +309,5 @@ window.addEventListener("DOMContentLoaded", () => {
   createSettingsMenu();
   setupOpenButton();
   monitorPerformance();
+  applyUserBackground(); // <— ensures color persists even after searches
 });
