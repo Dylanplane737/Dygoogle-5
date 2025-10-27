@@ -1,7 +1,34 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<title>Nova</title>
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<link rel="icon" type="image/png" href="falcon.png">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nova</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="falcon.png">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <!-- Logo -->
+  <div class="logo-container">
+    <img src="Novalogo.png" alt="Nova Logo" class="logo">
+  </div>
+
+  <!-- Search Bar -->
+  <div class="search-wrap">
+    <input type="text" id="searchInput" placeholder="Search..." autocomplete="off">
+    <button id="searchButton">Search</button>
+  </div>
+
+  <!-- Results -->
+  <div id="resultContainer"></div>
+
+  <!-- Scripts -->
+  <script src="Main.js"></script>
+  <!-- <script src="Main1.js"></script> Optional for overflow -->
+</body>
+</html>
