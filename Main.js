@@ -129,7 +129,7 @@ async function getTimeline(query){
 
 function renderTimeline(sentences){
   if(!sentences.length){ 
-    timelineList.innerHTML="<p>No timeline events found.</p>"; 
+    timelineList.innerHTML="<p>No timeline stuff found :( </p>"; 
     return; 
   }
 
@@ -155,47 +155,70 @@ closeLightbox.onclick=closeLightboxFn; lightNext.onclick=lightNextFn; lightPrev.
 
 // ===== Main Search =====
 document.getElementById("openBtn").onclick=openWebsite;
+async function openWebsite() {
+  // Reset images for new search
+  resetInfiniteImages();
 
-async function openWebsite(){
-  const input=urlInput.value.trim();
-  if(!input){ alert("Enter something!"); return; }
-  resultContainer.classList.remove("visible"); imagesSection.innerHTML=""; videosSection.innerHTML=""; imagesList=[]; currentLightIndex=-1;
-  dictionaryResults.innerHTML=""; timelineList.innerHTML="";
-  dictionaryContainer.style.display="none"; timelineContainer.style.display="none";
+  const input = urlInput.value.trim();
+  if (!input) { 
+    alert("Enter something!"); 
+    return; 
+  }
+
+  resultContainer.classList.remove("visible");
+  imagesSection.innerHTML = "";
+  videosSection.innerHTML = "";
+  imagesList = [];
+  currentLightIndex = -1;
+
+  dictionaryResults.innerHTML = "";
+  timelineList.innerHTML = "";
+  dictionaryContainer.style.display = "none";
+  timelineContainer.style.display = "none";
+
   showSpinner();
-  try{
-    currentQuery=input;
+  try {
+    currentQuery = input;
+
+    // Load first batch of infinite images
+    loadMoreImages();
 
     // Wikipedia Summary
-    const summary=await getWikiSummary(input);
-    if(!summary){ alert("No Wikipedia found"); return; }
-    wikiSummaryEl.innerHTML=`<h2>${escapeHtml(summary.title)}</h2>`+
-                            `${summary.thumbnail?`<img src="${summary.thumbnail}">`:""}`+
-                            `<p>${escapeHtml(summary.extract)}</p>`+
-                            `<p><a href="${summary.fullurl}" target="_blank">Read more on Wikipedia</a></p>`;
+    const summary = await getWikiSummary(input);
+    if (!summary) { alert("No Wikipedia found"); return; }
+    wikiSummaryEl.innerHTML = `<h2>${escapeHtml(summary.title)}</h2>` +
+                              `${summary.thumbnail ? `<img src="${summary.thumbnail}">` : ""}` +
+                              `<p>${escapeHtml(summary.extract)}</p>` +
+                              `<p><a href="${summary.fullurl}" target="_blank">Read more on Wikipedia</a></p>`;
 
-    // Commons Media
-    const media=await getCommonsMedia(input);
-    for(const src of media.images){
-      const img=document.createElement("img");
-      img.src=src;
-      img.onclick=()=>{ const idx=imagesList.indexOf(src); openLightbox(idx>=0?idx:(imagesList.push(src)-1)); };
-      imagesSection.appendChild(img);
-      imagesList.push(src);
-    }
-    videosSection.innerHTML = media.videos.length? media.videos.map(v=>`<video src="${v}" controls></video>`).join("") : "<p>No videos found</p>";
+    // Videos
+    const media = await getCommonsMedia(input);
+    videosSection.innerHTML = media.videos.length 
+      ? media.videos.map(v => `<video src="${v}" controls></video>`).join("") 
+      : "<p>No videos found :( </p>";
 
     // Dictionary
-    const dictData=await getDictionary(input);
-    if(dictData.length){ dictionaryContainer.style.display="block"; renderDictionary(dictData); }
+    const dictData = await getDictionary(input);
+    if(dictData.length){ 
+      dictionaryContainer.style.display = "block"; 
+      renderDictionary(dictData); 
+    }
 
     // Timeline
-   async function getTimeline(query){
-  if(!query) return [];
-  try{
-    const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`);
-    const data = await res.json();
-    if(!data.extract) return [];
+    const timelineEvents = await getTimeline(input);
+    if(timelineEvents.length){ 
+      timelineContainer.style.display = "block"; 
+      renderTimeline(timelineEvents); 
+    }
+
+    resultContainer.classList.add("visible");
+  } catch(err){ 
+    console.error(err); 
+    alert("Search error"); 
+  } finally { 
+    hideSpinner(); 
+  }
+}
 
     // Split into sentences
     const sentences = data.extract.split(". ");
@@ -225,4 +248,77 @@ urlInput.addEventListener("keydown", e=>{
   else if(e.key==="Enter"){ if(highlightedIndex>=0) urlInput.value=items[highlightedIndex].textContent; suggestionBox.classList.remove("show"); openWebsite(); }
 });
 function highlightItem(items){ items.forEach((i,j)=>i.classList.toggle("highlighted",j===highlightedIndex)); }
+// ===== Infinite Images Loader =====
+let imageOffset = 0;        // how many images have been loaded
+const imageBatchSize = 20;  // number of images per batch
+let isLoadingImages = false; // prevent multiple fetches at once
+
+async function loadMoreImages() {
+  if(isLoadingImages) return;
+  isLoadingImages = true;
+
+  // Fetch more images from Wikimedia Commons
+  try {
+    const res = await fetch(`https://commons.wikimedia.org/w/api.php?action=query&origin=*&format=json&generator=search&gsrsearch=${encodeURIComponent(currentQuery)}&gsrlimit=${imageBatchSize}&gsroffset=${imageOffset}&gsrnamespace=6&prop=imageinfo&iiprop=url|mime|thumbmime&iiurlwidth=400`);
+    const data = await res.json();
+    if(!data.query || !data.query.pages){ isLoadingImages = false; return; }
+
+    const pages = Object.values(data.query.pages);
+    pages.forEach(p => {
+      const info = p.imageinfo && p.imageinfo[0] ? p.imageinfo[0] : null;
+      if(!info || !info.url || !info.mime.startsWith("image/")) return;
+
+      const img = document.createElement("img");
+      img.dataset.src = info.thumburl || info.url; // lazy loading
+      img.alt = p.title || "";
+      img.classList.add("lazy-image");
+
+      // open lightbox on click
+      img.onclick = () => {
+        const idx = imagesList.indexOf(img.dataset.src);
+        openLightbox(idx >= 0 ? idx : (imagesList.push(img.dataset.src)-1));
+      };
+
+      imagesSection.appendChild(img);
+      imagesList.push(img.dataset.src);
+    });
+
+    imageOffset += pages.length;
+    lazyLoadImages(); // trigger lazy load
+  } catch(err){
+    console.error("Error loading images:", err);
+  } finally {
+    isLoadingImages = false;
+  }
+}
+
+// Lazy load images using IntersectionObserver
+function lazyLoadImages() {
+  const lazyImages = document.querySelectorAll("img.lazy-image");
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if(entry.isIntersecting){
+        const img = entry.target;
+        img.src = img.dataset.src;
+        img.classList.remove("lazy-image");
+        observer.unobserve(img);
+      }
+    });
+  });
+  lazyImages.forEach(img => observer.observe(img));
+}
+
+// Infinite scroll trigger
+window.addEventListener("scroll", () => {
+  if(window.innerHeight + window.scrollY >= document.body.offsetHeight - 500){
+    loadMoreImages();
+  }
+});
+
+// Reset images when performing a new search
+function resetInfiniteImages() {
+  imagesSection.innerHTML = "";
+  imagesList = [];
+  imageOffset = 0;
+}
 
