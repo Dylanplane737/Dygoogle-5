@@ -156,12 +156,15 @@ closeLightbox.onclick=closeLightboxFn; lightNext.onclick=lightNextFn; lightPrev.
 // ===== Main Search =====
 async function openWebsite() {
   const input = urlInput.value.trim();
-  if (!input) { alert("Enter something!"); return; }
+  if (!input) { 
+    alert("Enter something!"); 
+    return; 
+  }
 
   // Check if input looks like a URL
   const urlPattern = /^(https?:\/\/)?([\w-]+\.)+[\w-]{2,}(\/\S*)?$/i;
   if(urlPattern.test(input)){
-    // Add http:// if missing
+    // Add https:// if missing
     const fullUrl = input.startsWith("http") ? input : "https://" + input;
     window.open(fullUrl, "_blank");
     return; // skip the rest of openWebsite()
@@ -170,28 +173,22 @@ async function openWebsite() {
   // Reset images for new search
   resetInfiniteImages();
 
-  const input = urlInput.value.trim();
-  if (!input) { 
-    alert("Enter something!"); 
-    return; 
-  }
-
+  // Now continue the regular search with the same `input` variable
   resultContainer.classList.remove("visible");
   imagesSection.innerHTML = "";
   videosSection.innerHTML = "";
   imagesList = [];
   currentLightIndex = -1;
-
   dictionaryResults.innerHTML = "";
   timelineList.innerHTML = "";
   dictionaryContainer.style.display = "none";
   timelineContainer.style.display = "none";
-
   showSpinner();
+
   try {
     currentQuery = input;
 
-    // Load first batch of infinite images
+    // Load first batch of images
     loadMoreImages();
 
     // Wikipedia Summary
