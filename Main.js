@@ -128,8 +128,22 @@ async function getTimeline(query){
 }
 
 function renderTimeline(sentences){
-  if(!sentences.length){ timelineList.innerHTML="<p>No timeline events found.</p>"; return; }
-  timelineList.innerHTML = sentences.map(s=>`<p>• ${escapeHtml(s)}</p>`).join("");
+  if(!sentences.length){ 
+    timelineList.innerHTML="<p>No timeline events found.</p>"; 
+    return; 
+  }
+
+  timelineList.innerHTML = sentences.map((s)=>{
+    // Extract first year or range from sentence
+    const yearMatch = s.match(/\b\d{3,4}(?:–\d{2,4})?\b/);
+    const yearText = yearMatch ? yearMatch[0] : "";
+    return `
+      <div class="timeline-item" onclick="alert('${escapeHtml(s)}')">
+        <div class="timeline-year">${escapeHtml(yearText)}</div>
+        <div class="timeline-desc">${escapeHtml(s)}</div>
+      </div>
+    `;
+  }).join("");
 }
 
 // ===== Lightbox =====
@@ -176,8 +190,27 @@ async function openWebsite(){
     if(dictData.length){ dictionaryContainer.style.display="block"; renderDictionary(dictData); }
 
     // Timeline
-    const timelineEvents=await getTimeline(input);
-    if(timelineEvents.length){ timelineContainer.style.display="block"; renderTimeline(timelineEvents); }
+   async function getTimeline(query){
+  if(!query) return [];
+  try{
+    const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`);
+    const data = await res.json();
+    if(!data.extract) return [];
+
+    // Split into sentences
+    const sentences = data.extract.split(". ");
+
+    // Keep sentences with a year (4 digits) OR a range like 1939–1945
+    const yearRegex = /\b\d{3,4}(?:–\d{2,4})?\b/;
+    const timelineSentences = sentences.filter(s => yearRegex.test(s));
+
+    // If none found, fallback to first 6 sentences
+    return timelineSentences.length ? timelineSentences : sentences.slice(0,6);
+
+  } catch {
+    return [];
+  }
+}
 
     resultContainer.classList.add("visible");
   }catch(err){ console.error(err); alert("Search error"); }finally{ hideSpinner(); }
