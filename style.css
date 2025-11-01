@@ -102,3 +102,8 @@ canvas#matrixCanvas { position:fixed; inset:0; z-index:1200; pointer-events:none
   display: block;
   margin: 0 auto;     /* center it */
 }
+@media (max-width: 600px) {
+  .logo img#mainLogo {
+    height: 40px;
+  }
+}
