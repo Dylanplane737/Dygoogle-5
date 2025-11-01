@@ -64,3 +64,35 @@ canvas#matrixCanvas { position:fixed; inset:0; z-index:1200; pointer-events:none
   #wikiSummary,#relatedMedia { width:100%; }
   .media-section img, .media-section video { width:140px; height:100px; }
 }
+.timeline-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-left: 0;
+  margin: 10px 0;
+}
+
+.timeline-list p {
+  position: relative;
+  padding-left: 20px;
+  margin: 0;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.timeline-list p::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 6px;
+  width: 10px;
+  height: 10px;
+  background-color: #ff6f61;
+  border-radius: 50%;
+}
+
+.timeline-list p:hover {
+  background-color: #fff3e0;
+  border-left: 4px solid #ff6f61;
+  padding-left: 16px;
+}
