@@ -1,3 +1,42 @@
+:root {
+  --bg-color: #1e90ff;        /* Nova Blue default */
+  --text-color: #fff;
+  --header-bg: #0d6efd;
+  --button-bg: #0d6efd;
+  --button-text: #fff;
+  --panel-bg: #fff;
+  --panel-text: #000;
+  --media-bg: #f0f0f0;
+}
+
+/* Apply variables */
+body {
+  background: var(--bg-color);
+  color: var(--text-color);
+  transition: background 0.25s, color 0.25s;
+}
+
+header, .logo {
+  background: var(--header-bg);
+  color: var(--text-color);
+}
+
+button {
+  background: var(--button-bg);
+  color: var(--button-text);
+  border: none;
+  border-radius: 5px;
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: background 0.25s, color 0.25s;
+}
+
+#settingsPanel, #debugPanel, .timeline-list, .media-section, #dictionaryContainer {
+  background: var(--panel-bg);
+  color: var(--panel-text);
+  transition: background 0.25s, color 0.25s;
+}
+
 body {
   font-family: "Pixelify Sans", system-ui, -apple-system, "Segoe UI", Roboto, Arial;
   background-color: #2596be;
