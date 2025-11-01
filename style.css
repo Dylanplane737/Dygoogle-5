@@ -96,3 +96,9 @@ canvas#matrixCanvas { position:fixed; inset:0; z-index:1200; pointer-events:none
   border-left: 4px solid #ff6f61;
   padding-left: 16px;
 }
+.logo img#mainLogo {
+  height: 60px;       /* adjust as needed */
+  width: auto;
+  display: block;
+  margin: 0 auto;     /* center it */
+}
