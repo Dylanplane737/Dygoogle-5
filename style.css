@@ -97,7 +97,7 @@ canvas#matrixCanvas { position:fixed; inset:0; z-index:1200; pointer-events:none
   padding-left: 16px;
 }
 .logo img#mainLogo {
-  height: 60px;       /* adjust as needed */
+  height: 90px;       /* adjust as needed */
   width: auto;
   display: block;
   margin: 0 auto;     /* center it */
@@ -106,4 +106,44 @@ canvas#matrixCanvas { position:fixed; inset:0; z-index:1200; pointer-events:none
   .logo img#mainLogo {
     height: 40px;
   }
+}
+.timeline-bar {
+  display: flex;
+  overflow-x: auto;
+  gap: 20px;
+  padding: 10px 0;
+  border-top: 2px solid #ff6f61;
+  border-bottom: 2px solid #ff6f61;
+  scroll-behavior: smooth;
+}
+
+.timeline-bar::-webkit-scrollbar {
+  height: 8px;
+}
+
+.timeline-bar::-webkit-scrollbar-thumb {
+  background: #ff6f61;
+  border-radius: 4px;
+}
+
+.timeline-item {
+  flex: 0 0 auto;
+  min-width: 150px;
+  background: #fff3e0;
+  border-left: 4px solid #ff6f61;
+  padding: 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: transform 0.2s, background 0.2s;
+}
+
+.timeline-item:hover {
+  background: #ffe0d4;
+  transform: translateY(-5px);
+}
+
+.timeline-year {
+  font-weight: bold;
+  color: #ff6f61;
+  margin-bottom: 5px;
 }
