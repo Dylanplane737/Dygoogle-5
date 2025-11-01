@@ -67,17 +67,60 @@ settingsBtn.onclick = () => {
   }
 };
 
-// ===== BACKGROUND COLOR PRESETS =====
-const presetBtns = document.querySelectorAll(".presetBtn");
+// ===== UI PRESETS =====
+const themes = {
+  "Nova Blue": {
+    "--bg-color": "#1e90ff",
+    "--text-color": "#fff",
+    "--header-bg": "#0d6efd",
+    "--button-bg": "#0d6efd",
+    "--button-text": "#fff",
+    "--panel-bg": "#fff",
+    "--panel-text": "#000"
+  },
+  "Dark": {
+    "--bg-color": "#222",
+    "--text-color": "#eee",
+    "--header-bg": "#111",
+    "--button-bg": "#333",
+    "--button-text": "#fff",
+    "--panel-bg": "#333",
+    "--panel-text": "#fff"
+  },
+  "Light": {
+    "--bg-color": "#f0f0f0",
+    "--text-color": "#000",
+    "--header-bg": "#ddd",
+    "--button-bg": "#ccc",
+    "--button-text": "#000",
+    "--panel-bg": "#fff",
+    "--panel-text": "#000"
+  }
+};
+
 presetBtns.forEach(btn => {
   btn.addEventListener("click", () => {
-    document.body.style.background = btn.dataset.color;
-    localStorage.setItem("novaBgColor", btn.dataset.color);
-    // Update color picker too
-    const bgPicker = document.getElementById("bgColorPicker");
-    if(bgPicker) bgPicker.value = btn.dataset.color;
+    const theme = themes[btn.textContent.trim()];
+    if(theme){
+      for(const key in theme){
+        document.documentElement.style.setProperty(key, theme[key]);
+      }
+      localStorage.setItem("novaTheme", btn.textContent.trim());
+    }
   });
 });
+
+// ===== APPLY SAVED THEME ON LOAD =====
+const savedTheme = localStorage.getItem("novaTheme");
+if(savedTheme && themes[savedTheme]){
+  const theme = themes[savedTheme];
+  for(const key in theme){
+    document.documentElement.style.setProperty(key, theme[key]);
+  }
+  // Update color picker with background
+  const bgPicker = document.getElementById("bgColorPicker");
+  if(bgPicker) bgPicker.value = theme["--bg-color"];
+}
 
 // ===== CUSTOM COLOR PICKER =====
 const bgColorPicker = document.getElementById("bgColorPicker");
