@@ -154,8 +154,19 @@ function lightPrevFn(){ if(!imagesList.length) return; currentLightIndex=(curren
 closeLightbox.onclick=closeLightboxFn; lightNext.onclick=lightNextFn; lightPrev.onclick=lightPrevFn;
 
 // ===== Main Search =====
-document.getElementById("openBtn").onclick=openWebsite;
 async function openWebsite() {
+  const input = urlInput.value.trim();
+  if (!input) { alert("Enter something!"); return; }
+
+  // Check if input looks like a URL
+  const urlPattern = /^(https?:\/\/)?([\w-]+\.)+[\w-]{2,}(\/\S*)?$/i;
+  if(urlPattern.test(input)){
+    // Add http:// if missing
+    const fullUrl = input.startsWith("http") ? input : "https://" + input;
+    window.open(fullUrl, "_blank");
+    return; // skip the rest of openWebsite()
+  }
+
   // Reset images for new search
   resetInfiniteImages();
 
